@@ -1,0 +1,10 @@
+{
+  "name": "seventhings-quickstart",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {"build": "tsc", "check": "tsc --noEmit", "start": "node dist/main.js"},
+  "dependencies": {"@seventhingscompany/customer-api": "1.4.0"},
+  "devDependencies": {"@types/node": "^22.0.0", "typescript": "~5.9.3"}
+}

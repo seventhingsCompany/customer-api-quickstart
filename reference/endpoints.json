@@ -1,0 +1,623 @@
+{
+  "source": "https://raw.githubusercontent.com/seventhingsCompany/customer-api-docs/06bc24eff95421291f867e379ca9fe948ef4c8d4/src/schemas/customer-api.json",
+  "revision": "06bc24eff95421291f867e379ca9fe948ef4c8d4",
+  "sha256": "f23d028c39f447fe07cd48fc49b64f838eeeebb1fb58865cf91dddbbc4e98e8b",
+  "info": {
+    "version": "v0.17906_61372ea43_20260630",
+    "title": "seventhings customer API",
+    "description": "## Web API for seventhings instance, the fixed asset manager for successful companies.\nWith the seventhings asset tracking manager you digitize your internal process in no time\nand boost creativity and structure.\n## Client tasks\n### time management\nAll timestamps are delivered in UTC and displayed in Y-m-d H:i:s format.\nThe conversion to the local time zone is done on the client side.\n### translations\nAll textual content is also returned in a neutral form,\nso that translations are only done on the client side.\n",
+    "contact": {
+      "url": "https://www.seventhings.com/",
+      "email": "support@seventhings.com"
+    },
+    "license": {
+      "name": "proprietary",
+      "url": "https://www.seventhings.com/en/pricing"
+    }
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/customer-api/v1",
+      "summary": "Ping the API",
+      "operationId": "",
+      "tags": [
+        "default"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/asset-tracking/{template}/field-definition",
+      "summary": "Create a new field definition for a specific template.",
+      "operationId": "postAssetTrackingFieldDefinition",
+      "tags": [
+        "field definition"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/asset-tracking/{template}/field-definition/{fieldDefinitionUuid}",
+      "summary": "Get a field definition for a specific template.",
+      "operationId": "getAssetTrackingFieldDefinition",
+      "tags": [
+        "field definition"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/customer-api/v1/asset-tracking/{template}/field-definition/{fieldDefinitionUuid}",
+      "summary": "Update a field definition for a specific template.",
+      "operationId": "putAssetTrackingFieldDefinition",
+      "tags": [
+        "field definition"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/asset-tracking/{template}/field-definitions",
+      "summary": "Get all field definitions of a specific template.",
+      "operationId": "getAssetTrackingFieldDefinitions",
+      "tags": [
+        "field definition"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/auth_token",
+      "summary": "Revoke auth tokens",
+      "operationId": "",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/auth_token",
+      "summary": "Obtain an access token",
+      "operationId": "",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/circularity-hub/add-objects-to-circularity-hub",
+      "summary": "Add object to circularity-hub.",
+      "operationId": "postAssetTrackingObjectChubAdd",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/circularity-hub/item/{identifier}",
+      "summary": "Delete one item.",
+      "operationId": "deleteOneItemFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/circularity-hub/item/{identifier}",
+      "summary": "Get one item from circularity-hub.",
+      "operationId": "getOneItemFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/customer-api/v1/circularity-hub/item/{identifier}",
+      "summary": "Update one item.",
+      "operationId": "updateOneItemFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/circularity-hub/items",
+      "summary": "Get all items from circularity-hub.",
+      "operationId": "getItemsFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/circularity-hub/order/{identifier}",
+      "summary": "Get one order from circularity-hub.",
+      "operationId": "getOneOrderFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/customer-api/v1/circularity-hub/order/{identifier}",
+      "summary": "Update one order.",
+      "operationId": "updateOneOrderFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/circularity-hub/orders",
+      "summary": "Get all orders from circularity-hub.",
+      "operationId": "getOrdersFromCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/circularity-hub/orders",
+      "summary": "Create order and checkout items from circularity-hub.",
+      "operationId": "createOrderOfItemsForCircularityHub",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/circularity-hub/suggest-category",
+      "summary": "Suggest the chub-category of given objects.",
+      "operationId": "postAssetTrackingObjectSuggestChubCategory",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/circularity-hub/suggest-rest-price",
+      "summary": "Suggested or set price of given objects.",
+      "operationId": "postAssetTrackingObjectSuggestChubPrice",
+      "tags": [
+        "circularity-hub"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/file",
+      "summary": "Create a new file resource",
+      "operationId": "postFiles",
+      "tags": [
+        "files"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/file/{fileUuid}",
+      "summary": "Get a file resource",
+      "operationId": "getFile",
+      "tags": [
+        "files"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/file/{fileUuid}/data",
+      "summary": "Get a file resource data",
+      "operationId": "getFileData",
+      "tags": [
+        "files"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/file/{fileUuid}/thumbnail",
+      "summary": "Get a file resource thumbnail",
+      "operationId": "getFileThumbnail",
+      "tags": [
+        "files"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/files",
+      "summary": "Get a list of file resources",
+      "operationId": "getFiles",
+      "tags": [
+        "files"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/location",
+      "summary": "Create a new location.",
+      "operationId": "postAssetTrackingLocation",
+      "tags": [
+        "locations"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/location/{locationUuid}",
+      "summary": "Delete location.",
+      "operationId": "deleteAssetTrackingLocation",
+      "tags": [
+        "locations"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/location/{locationUuid}",
+      "summary": "Get location.",
+      "operationId": "getAssetTrackingLocation",
+      "tags": [
+        "locations"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/customer-api/v1/location/{locationUuid}",
+      "summary": "Update location.",
+      "operationId": "putAssetTrackingLocation",
+      "tags": [
+        "locations"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/locations",
+      "summary": "Get all locations.",
+      "operationId": "getAssetTrackingLocations",
+      "tags": [
+        "locations"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/locations/count",
+      "summary": "Get count of all locations.",
+      "operationId": "getAssetTrackingLocationsCount",
+      "tags": [
+        "locations"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/object",
+      "summary": "Create a new object.",
+      "operationId": "postAssetTrackingObject",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/object/{objectUuid}",
+      "summary": "Finally delete a single object.",
+      "operationId": "finalkyDeleteAssetTrackingObject",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/object/{objectUuid}",
+      "summary": "Get a single object.",
+      "operationId": "getAssetTrackingObject",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/customer-api/v1/object/{objectUuid}",
+      "summary": "Update a single object.",
+      "operationId": "patchAssetTrackingObject",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/object/{objectUuid}/add-file",
+      "summary": "Add a file to objects field definition.",
+      "operationId": "addFileToObjectsFieldDefinition",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/object/{objectUuid}/archive",
+      "summary": "Archive a single object.",
+      "operationId": "archiveAssetTrackingObject",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/object/{objectUuid}/remove-file",
+      "summary": "Remove a file from objects field definition.",
+      "operationId": "removeFileFromObjectsFieldDefinition",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/object/{objectUuid}/unarchive",
+      "summary": "Unarchive a single object.",
+      "operationId": "unarchiveAssetTrackingObject",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/objects",
+      "summary": "Get all objects.",
+      "operationId": "getAssetTrackingObjects",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/objects/count",
+      "summary": "Get count of all objects.",
+      "operationId": "getAssetTrackingObjectsCount",
+      "tags": [
+        "objects"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/person",
+      "summary": "Create a new person.",
+      "operationId": "createAssetTrackingPerson",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/person/by-id/{personId}",
+      "summary": "Get person by id.",
+      "operationId": "getPersonDetailById",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/person/{personUuid}",
+      "summary": "Delete person.",
+      "operationId": "deleteAssetTrackingPerson",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/person/{personUuid}",
+      "summary": "Get person by uuid.",
+      "operationId": "getPersonDetail",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/customer-api/v1/person/{personUuid}",
+      "summary": "Update person.",
+      "operationId": "putAssetTrackingPerson",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/persons",
+      "summary": "Get person list.",
+      "operationId": "getPersonList",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/persons/count",
+      "summary": "Count all persons.",
+      "operationId": "getAssetTrackingPersonsCount",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/persons/create-user",
+      "summary": "Create a new user from person.",
+      "operationId": "createUserFromAssetTrackingPerson",
+      "tags": [
+        "person"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/rental-management/rental-case",
+      "summary": "Create a new Rental Case",
+      "operationId": "createRentalCase",
+      "tags": [
+        "rental management"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/rental-management/rental-case/{rentalCaseUuid}",
+      "summary": "Delete a Rental Case",
+      "operationId": "deleteRentalCase",
+      "tags": [
+        "rental management"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/rental-management/rental-case/{rentalCaseUuid}",
+      "summary": "Get a Rental Case",
+      "operationId": "getRentalCase",
+      "tags": [
+        "rental management"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/customer-api/v1/rental-management/rental-case/{rentalCaseUuid}",
+      "summary": "Update a Rental Case",
+      "operationId": "updateRentalCase",
+      "tags": [
+        "rental management"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/rental-management/rental-cases",
+      "summary": "Get all Rental Cases",
+      "operationId": "getRentalCases",
+      "tags": [
+        "rental management"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/room",
+      "summary": "Create a new room.",
+      "operationId": "postAssetTrackingRoom",
+      "tags": [
+        "rooms"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/room/{roomUuid}",
+      "summary": "Delete room.",
+      "operationId": "deleteAssetTrackingRoom",
+      "tags": [
+        "rooms"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/room/{roomUuid}",
+      "summary": "Get room.",
+      "operationId": "getAssetTrackingRoom",
+      "tags": [
+        "rooms"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/customer-api/v1/room/{roomUuid}",
+      "summary": "Update room.",
+      "operationId": "putAssetTrackingRoom",
+      "tags": [
+        "rooms"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/rooms",
+      "summary": "Get all rooms.",
+      "operationId": "getAssetTrackingRooms",
+      "tags": [
+        "rooms"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/rooms/count",
+      "summary": "Get count of all rooms.",
+      "operationId": "getAssetTrackingRoomsCount",
+      "tags": [
+        "rooms"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/customer-api/v1/task-management/task",
+      "summary": "Create a new Task",
+      "operationId": "createTask",
+      "tags": [
+        "task management"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/customer-api/v1/task-management/task/{taskUuid}",
+      "summary": "Delete a Task",
+      "operationId": "deleteTask",
+      "tags": [
+        "task management"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/task-management/task/{taskUuid}",
+      "summary": "Get a Task",
+      "operationId": "getTask",
+      "tags": [
+        "task management"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/customer-api/v1/task-management/task/{taskUuid}",
+      "summary": "Update a Task",
+      "operationId": "updateTask",
+      "tags": [
+        "task management"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/customer-api/v1/task-management/task/{taskUuid}/status",
+      "summary": "Update a Task status",
+      "operationId": "updateTaskStatus",
+      "tags": [
+        "task management"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/task-management/tasks",
+      "summary": "Get a list of Tasks",
+      "operationId": "getTasks",
+      "tags": [
+        "task management"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/user/by-id/{userId}",
+      "summary": "Get user by id.",
+      "operationId": "getUserDetailById",
+      "tags": [
+        "user"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/user/{userUuid}",
+      "summary": "Get user by uuid.",
+      "operationId": "getUserDetail",
+      "tags": [
+        "user"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/customer-api/v1/users",
+      "summary": "Get user list.",
+      "operationId": "getUserList",
+      "tags": [
+        "user"
+      ]
+    }
+  ]
+}

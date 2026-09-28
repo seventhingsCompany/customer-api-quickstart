@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "sdks": {
+    "typescript": {"repository": "https://github.com/seventhingsCompany/customer-api-typescript.git", "package": "@seventhingscompany/customer-api", "version": "1.4.0", "revision": "f4edd4f04183e922a41ce186151b591be0545300", "runtime": "Node.js 22+", "starter": "starters/typescript"},
+    "python": {"repository": "https://github.com/seventhingsCompany/customer-api-python.git", "package": "seventhings-customer-api", "version": "1.4.0", "revision": "2e9d0e1f7d7f04d4426e361d28e26a011d9b2652", "runtime": "Python 3.10+", "starter": "starters/python"},
+    "go": {"repository": "https://github.com/seventhingsCompany/customer-api-go.git", "package": "github.com/SeventhingsCompany/customer-api-go", "version": "1.4.0", "revision": "9de30225f4059a4570761fa3273a0f8088bbc26d", "runtime": "Go 1.25+", "starter": "starters/go"},
+    "php": {"repository": "https://github.com/seventhingsCompany/customer-api-php.git", "package": "seventhings/customer-api-php", "version": "1.4.0", "revision": "ab60880a0b7ce06146535ac08763f858a5858746", "runtime": "PHP 8.5+ and Composer 2", "starter": "starters/php"}
+  },
+  "reference": {
+    "repository": "https://github.com/seventhingsCompany/customer-api-docs.git",
+    "revision": "06bc24eff95421291f867e379ca9fe948ef4c8d4",
+    "path": "src/schemas/customer-api.json",
+    "documentation": "https://api.seventhings.com/"
+  }
+}

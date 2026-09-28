@@ -1,0 +1,78 @@
+name: Verify quickstart
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: astral-sh/setup-uv@v6
+      - run: uvx ruff@0.16.9 check scripts starters/python/main.py
+      - run: uvx ruff@0.16.9 format --check scripts starters/python/main.py
+      - run: python scripts/check.py
+  starters:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [typescript, python, go, php]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/setup-node@v4
+        if: matrix.language == 'typescript'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: starters/typescript/package-lock.json
+      - uses: actions/setup-go@v5
+        if: matrix.language == 'go'
+        with:
+          go-version: '1.25'
+          cache-dependency-path: starters/go/go.sum
+      - uses: shivammathur/setup-php@v2
+        if: matrix.language == 'php'
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+      - name: Install and check TypeScript
+        if: matrix.language == 'typescript'
+        working-directory: starters/typescript
+        run: |
+          npm ci
+          npm run check
+          npm run build
+      - name: Install and check Python
+        if: matrix.language == 'python'
+        working-directory: starters/python
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r requirements.txt
+          .venv/bin/python -m compileall -q main.py
+      - name: Check Go
+        if: matrix.language == 'go'
+        working-directory: starters/go
+        run: |
+          go mod download
+          go vet ./...
+          go test ./...
+          test -z "$(gofmt -l main.go)"
+      - name: Install and check PHP
+        if: matrix.language == 'php'
+        working-directory: starters/php
+        run: |
+          composer install --no-interaction --prefer-dist
+          composer validate --no-check-publish
+          composer check
+      - name: Offline contract checks
+        run: python scripts/test-starter.py ${{ matrix.language }}

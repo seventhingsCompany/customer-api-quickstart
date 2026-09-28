@@ -1,0 +1,7 @@
+{
+  "name": "seventhings/customer-api-quickstart",
+  "type": "project",
+  "license": "MIT",
+  "require": {"php": "^8.5", "seventhings/customer-api-php": "1.4.0"},
+  "scripts": {"check": "php -l main.php", "start": "php main.php"}
+}

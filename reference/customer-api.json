@@ -1,0 +1,6527 @@
+{
+  "openapi": "3.0.3",
+  "servers": [
+    {
+      "url": "https://your-instance.seventhings.com",
+      "description": "update link with your instance name"
+    },
+    {
+      "url": "/",
+      "description": "relative links"
+    },
+    {
+      "url": "https://itexia.localhost",
+      "description": "local development server"
+    }
+  ],
+  "info": {
+    "version": "v0.17906_61372ea43_20260630",
+    "title": "seventhings customer API",
+    "description": "## Web API for seventhings instance, the fixed asset manager for successful companies.\nWith the seventhings asset tracking manager you digitize your internal process in no time\nand boost creativity and structure.\n## Client tasks\n### time management\nAll timestamps are delivered in UTC and displayed in Y-m-d H:i:s format.\nThe conversion to the local time zone is done on the client side.\n### translations\nAll textual content is also returned in a neutral form,\nso that translations are only done on the client side.\n",
+    "contact": {
+      "url": "https://www.seventhings.com/",
+      "email": "support@seventhings.com"
+    },
+    "license": {
+      "name": "proprietary",
+      "url": "https://www.seventhings.com/en/pricing"
+    }
+  },
+  "tags": [
+    {
+      "name": "default",
+      "description": "Useful routes for a client application."
+    },
+    {
+      "name": "auth",
+      "description": "Login and authentication of the API."
+    },
+    {
+      "name": "objects",
+      "description": "Handle objects with the API."
+    },
+    {
+      "name": "rooms",
+      "description": "Handle rooms with the API."
+    },
+    {
+      "name": "locations",
+      "description": "Handle locations with the API."
+    },
+    {
+      "name": "user",
+      "description": "Handle user with the API."
+    },
+    {
+      "name": "person",
+      "description": "Handle person with the API."
+    },
+    {
+      "name": "files",
+      "description": "Handle files with the API."
+    },
+    {
+      "name": "field definition",
+      "description": "Handle field definitions with the API."
+    },
+    {
+      "name": "circularity-hub",
+      "description": "Handle chub with the API."
+    },
+    {
+      "name": "task management",
+      "description": "Handle tasks with the API."
+    },
+    {
+      "name": "rental management",
+      "description": "Handle rental cases with the API."
+    }
+  ],
+  "paths": {
+    "/customer-api/v1": {
+      "get": {
+        "tags": [
+          "default"
+        ],
+        "summary": "Ping the API",
+        "description": "Default Message that API exists here, no login required.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "seventhings API is ready"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/auth_token": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Obtain an access token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AuthLoginRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSOAuthCodeTokenRequest"
+                  }
+                ]
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthLoginOrRefreshTokenFormData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessAndRefreshTokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "description": "Invalid username and password combination or refresh token"
+          },
+          "403": {
+            "description": "User is not allowed to login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIsNotAllowedToLoginDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Revoke auth tokens",
+        "description": "Revokes all auth tokens (refresh and access tokens) for user (identified by bearer token)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Auth tokens were revoked"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/objects": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPerPage"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Sorting"
+          }
+        ],
+        "tags": [
+          "objects"
+        ],
+        "summary": "Get all objects.",
+        "description": "Get all objects.",
+        "operationId": "getAssetTrackingObjects",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/objects/count": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Filter"
+          }
+        ],
+        "tags": [
+          "objects"
+        ],
+        "summary": "Get count of all objects.",
+        "description": "Get count of all objects.",
+        "operationId": "getAssetTrackingObjectsCount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/object": {
+      "post": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Create a new object.",
+        "description": "Create a new object.",
+        "operationId": "postAssetTrackingObject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the newly created object."
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/object/{objectUuid}": {
+      "parameters": [
+        {
+          "name": "objectUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Get a single object.",
+        "description": "Get a single object.",
+        "operationId": "getAssetTrackingObject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Update a single object.",
+        "description": "Update a single object.",
+        "operationId": "patchAssetTrackingObject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Finally delete a single object.",
+        "description": "Finally delete a single object.",
+        "operationId": "finalkyDeleteAssetTrackingObject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/object/{objectUuid}/archive": {
+      "parameters": [
+        {
+          "name": "objectUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "post": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Archive a single object.",
+        "description": "Archive a single object.",
+        "operationId": "archiveAssetTrackingObject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/object/{objectUuid}/unarchive": {
+      "parameters": [
+        {
+          "name": "objectUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "post": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Unarchive a single object.",
+        "description": "Unarchive a single object.",
+        "operationId": "unarchiveAssetTrackingObject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/object/{objectUuid}/add-file": {
+      "parameters": [
+        {
+          "name": "objectUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "post": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Add a file to objects field definition.",
+        "description": "Add a file to objects field definition",
+        "operationId": "addFileToObjectsFieldDefinition",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field-key": {
+                      "type": "string",
+                      "description": "The key of the field definition where the file should be added to."
+                    },
+                    "file-uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "207": {
+            "description": "Return all results of each request body array items."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/object/{objectUuid}/remove-file": {
+      "parameters": [
+        {
+          "name": "objectUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "post": {
+        "tags": [
+          "objects"
+        ],
+        "summary": "Remove a file from objects field definition.",
+        "description": "Remove a file from objects field definition",
+        "operationId": "removeFileFromObjectsFieldDefinition",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field-key": {
+                      "type": "string",
+                      "description": "The key of the field definition where the file should be removed from."
+                    },
+                    "file-uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "207": {
+            "description": "Return all results of each request body array items."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/rooms": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPerPage"
+          }
+        ],
+        "tags": [
+          "rooms"
+        ],
+        "summary": "Get all rooms.",
+        "description": "Get all rooms.",
+        "operationId": "getAssetTrackingRooms",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/rooms/count": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Filter"
+          }
+        ],
+        "tags": [
+          "rooms"
+        ],
+        "summary": "Get count of all rooms.",
+        "description": "Get count of all rooms.",
+        "operationId": "getAssetTrackingRoomsCount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/room": {
+      "post": {
+        "tags": [
+          "rooms"
+        ],
+        "summary": "Create a new room.",
+        "description": "Create a new room.",
+        "operationId": "postAssetTrackingRoom",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the newly created room."
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/room/{roomUuid}": {
+      "parameters": [
+        {
+          "name": "roomUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "rooms"
+        ],
+        "summary": "Get room.",
+        "description": "Get room.",
+        "operationId": "getAssetTrackingRoom",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "rooms"
+        ],
+        "summary": "Update room.",
+        "description": "Update room.",
+        "operationId": "putAssetTrackingRoom",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "rooms"
+        ],
+        "summary": "Delete room.",
+        "description": "Delete room.",
+        "operationId": "deleteAssetTrackingRoom",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/locations": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPerPage"
+          }
+        ],
+        "tags": [
+          "locations"
+        ],
+        "summary": "Get all locations.",
+        "description": "Get all locations.",
+        "operationId": "getAssetTrackingLocations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/locations/count": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Filter"
+          }
+        ],
+        "tags": [
+          "locations"
+        ],
+        "summary": "Get count of all locations.",
+        "description": "Get count of all locations.",
+        "operationId": "getAssetTrackingLocationsCount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/location": {
+      "post": {
+        "tags": [
+          "locations"
+        ],
+        "summary": "Create a new location.",
+        "description": "Create a new location.",
+        "operationId": "postAssetTrackingLocation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the newly created location."
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/location/{locationUuid}": {
+      "parameters": [
+        {
+          "name": "locationUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "locations"
+        ],
+        "summary": "Get location.",
+        "description": "Get location.",
+        "operationId": "getAssetTrackingLocation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "locations"
+        ],
+        "summary": "Update location.",
+        "description": "Update location.",
+        "operationId": "putAssetTrackingLocation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "locations"
+        ],
+        "summary": "Delete location.",
+        "description": "Delete location.",
+        "operationId": "deleteAssetTrackingLocation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/users": {
+      "get": {
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1,
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "example": 50
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "description": "Sort by",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "email"
+              ],
+              "default": "id"
+            },
+            "example": "id"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order direction",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "ASC",
+                "desc",
+                "DESC"
+              ],
+              "default": "asc"
+            },
+            "example": "asc"
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user list.",
+        "description": "Get the information about the users.",
+        "operationId": "getUserList",
+        "responses": {
+          "200": {
+            "description": "The information about the user currently logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      },
+                      "minItems": 0,
+                      "maxItems": 1000
+                    },
+                    "page": {
+                      "type": "integer",
+                      "format": "int32",
+                      "default": 1,
+                      "minimum": 1,
+                      "maximum": 10000
+                    },
+                    "per_page": {
+                      "type": "integer",
+                      "format": "int32",
+                      "default": 50,
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "sort_by": {
+                      "type": "string",
+                      "enum": [
+                        "id",
+                        "email"
+                      ],
+                      "default": "id"
+                    },
+                    "order": {
+                      "type": "string",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ],
+                      "default": "asc"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/user/{userUuid}": {
+      "parameters": [
+        {
+          "name": "userUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user by uuid.",
+        "description": "Get the information about the user by uuid.",
+        "operationId": "getUserDetail",
+        "responses": {
+          "200": {
+            "description": "The information about the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/user/by-id/{userId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user by id.",
+        "description": "Get the information about the user by integer id.",
+        "operationId": "getUserDetailById",
+        "responses": {
+          "200": {
+            "description": "The information about the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/persons": {
+      "get": {
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1,
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "example": 50
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "description": "Sort by",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "id",
+              "description": "Sort by fieldkey."
+            },
+            "example": "id"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order direction",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "ASC",
+                "desc",
+                "DESC"
+              ],
+              "default": "asc"
+            },
+            "example": "asc"
+          }
+        ],
+        "tags": [
+          "person"
+        ],
+        "summary": "Get person list.",
+        "description": "Get the information about the persons.",
+        "operationId": "getPersonList",
+        "responses": {
+          "200": {
+            "description": "The information about the person currently logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Person"
+                      },
+                      "minItems": 0,
+                      "maxItems": 1000
+                    },
+                    "page": {
+                      "type": "integer",
+                      "format": "int32",
+                      "default": 1,
+                      "minimum": 1,
+                      "maximum": 10000
+                    },
+                    "per_page": {
+                      "type": "integer",
+                      "format": "int32",
+                      "default": 50,
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "sort_by": {
+                      "type": "string",
+                      "default": "id"
+                    },
+                    "order": {
+                      "type": "string",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ],
+                      "default": "asc"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/person": {
+      "post": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Create a new person.",
+        "description": "Create a new person.",
+        "operationId": "createAssetTrackingPerson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePerson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the newly created person resource."
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/person/{personUuid}": {
+      "parameters": [
+        {
+          "name": "personUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Get person by uuid.",
+        "description": "Get the information about the person by uuid.",
+        "operationId": "getPersonDetail",
+        "responses": {
+          "200": {
+            "description": "The information about the person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Update person.",
+        "description": "Update person.",
+        "operationId": "putAssetTrackingPerson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Delete person.",
+        "description": "Delete person.",
+        "operationId": "deleteAssetTrackingPerson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/persons/count": {
+      "get": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Count all persons.",
+        "description": "Count all persons.",
+        "operationId": "getAssetTrackingPersonsCount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/person/by-id/{personId}": {
+      "parameters": [
+        {
+          "name": "personId",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/PersonId"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Get person by id.",
+        "description": "Get the information about the person by integer id.",
+        "operationId": "getPersonDetailById",
+        "responses": {
+          "200": {
+            "description": "The information about the person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/persons/create-user": {
+      "post": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Create a new user from person.",
+        "description": "Create a new user from person.",
+        "operationId": "createUserFromAssetTrackingPerson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "$ref": "#/components/schemas/Filter",
+                    "example": {
+                      "filter": {
+                        "email": {
+                          "eq": "tester@domain.de"
+                        }
+                      }
+                    },
+                    "description": "The filter to find the person to create user from.\nHave a look at the field definition to find a unique attribute for this filter.\nAll found persons will be used to create users, so make sure to use a filter\nthat only finds one person. You can check the filter against person list\nendpoint to see how many persons will be found by the filter.\n\nThe created user will receive an email if successful.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/task-management/tasks": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaskStatusFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TaskDeadlineFromFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TaskDeadlineToFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TaskAssigneeFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TaskAuthorFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TaskReferenceTypeFilter"
+          }
+        ],
+        "tags": [
+          "task management"
+        ],
+        "summary": "Get a list of Tasks",
+        "description": "Get a list of Tasks.",
+        "operationId": "getTasks",
+        "responses": {
+          "200": {
+            "description": "A list of Task entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  },
+                  "minItems": 0,
+                  "maxItems": 10000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/task-management/task": {
+      "post": {
+        "tags": [
+          "task management"
+        ],
+        "summary": "Create a new Task",
+        "description": "Create a new Task.",
+        "operationId": "createTask",
+        "requestBody": {
+          "description": "Task to be created",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Location of the newly created Task"
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/task-management/task/{taskUuid}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "taskUuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "task management"
+        ],
+        "summary": "Get a Task",
+        "description": "Get a Task.",
+        "operationId": "getTask",
+        "responses": {
+          "200": {
+            "description": "A Task entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "task management"
+        ],
+        "summary": "Update a Task",
+        "description": "Update a Task.",
+        "operationId": "updateTask",
+        "requestBody": {
+          "description": "Task to be updated",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The Task was updated successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "task management"
+        ],
+        "summary": "Delete a Task",
+        "description": "Delete a Task.",
+        "operationId": "deleteTask",
+        "responses": {
+          "204": {
+            "description": "The Task was deleted successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/task-management/task/{taskUuid}/status": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "taskUuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "put": {
+        "tags": [
+          "task management"
+        ],
+        "summary": "Update a Task status",
+        "description": "Update a Task status.",
+        "operationId": "updateTaskStatus",
+        "requestBody": {
+          "description": "Task status",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "$ref": "#/components/schemas/TaskStatus"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The Task was updated successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/rental-management/rental-cases": {
+      "get": {
+        "tags": [
+          "rental management"
+        ],
+        "summary": "Get all Rental Cases",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPerPage"
+          },
+          {
+            "$ref": "#/components/parameters/Sorting"
+          }
+        ],
+        "description": "Get all Rental Cases",
+        "operationId": "getRentalCases",
+        "responses": {
+          "200": {
+            "description": "A list of Rental Case entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RentalCase"
+                  },
+                  "minItems": 0,
+                  "maxItems": 10000
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/rental-management/rental-case": {
+      "post": {
+        "tags": [
+          "rental management"
+        ],
+        "summary": "Create a new Rental Case",
+        "description": "Create a new Rental Case.",
+        "operationId": "createRentalCase",
+        "requestBody": {
+          "description": "Rental Case to be created",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRentalCase"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Location of the newly created Rental Case"
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/rental-management/rental-case/{rentalCaseUuid}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rentalCaseUuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "rental management"
+        ],
+        "summary": "Get a Rental Case",
+        "description": "Get a Rental Case.",
+        "operationId": "getRentalCase",
+        "responses": {
+          "200": {
+            "description": "A Task entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentalCase"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "rental management"
+        ],
+        "summary": "Update a Rental Case",
+        "description": "Update a Rental Case.",
+        "operationId": "updateRentalCase",
+        "requestBody": {
+          "description": "Rental Case to be updated",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRentalCase"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The Rental Case was updated successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "rental management"
+        ],
+        "summary": "Delete a Rental Case",
+        "description": "Delete a Rental Case.",
+        "operationId": "deleteRentalCase",
+        "responses": {
+          "204": {
+            "description": "The Rental Case was deleted successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/asset-tracking/{template}/field-definitions": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "template",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/AssetTrackingTemplate"
+          },
+          "description": "The template to get the field definitions for."
+        }
+      ],
+      "get": {
+        "tags": [
+          "field definition"
+        ],
+        "summary": "Get all field definitions of a specific template.",
+        "description": "Get all field definitions of a specific template.",
+        "operationId": "getAssetTrackingFieldDefinitions",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FieldDefinition"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/asset-tracking/{template}/field-definition": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "template",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/AssetTrackingTemplate"
+          },
+          "description": "The template to get the field definitions for."
+        }
+      ],
+      "post": {
+        "tags": [
+          "field definition"
+        ],
+        "summary": "Create a new field definition for a specific template.",
+        "description": "Create a new field definition for a specific template.",
+        "operationId": "postAssetTrackingFieldDefinition",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFieldDefinition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the newly created field definition."
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/asset-tracking/{template}/field-definition/{fieldDefinitionUuid}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "template",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/AssetTrackingTemplate"
+          },
+          "description": "The template to get the field definitions for."
+        },
+        {
+          "in": "path",
+          "name": "fieldDefinitionUuid",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "description": "The UUID of the field definition to get."
+        }
+      ],
+      "get": {
+        "tags": [
+          "field definition"
+        ],
+        "summary": "Get a field definition for a specific template.",
+        "description": "Get a field definition for a specific template.",
+        "operationId": "getAssetTrackingFieldDefinition",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "field definition"
+        ],
+        "summary": "Update a field definition for a specific template.",
+        "description": "Update a field definition for a specific template.",
+        "operationId": "putAssetTrackingFieldDefinition",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FieldDefinition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/files": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get a list of file resources",
+        "description": "Get a list of file resources.",
+        "operationId": "getFiles",
+        "responses": {
+          "200": {
+            "description": "A list of latest 20 uploaded file resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/File"
+                  },
+                  "maxItems": 20
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/file": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Create a new file resource",
+        "description": "Create a new file resource",
+        "operationId": "postFiles",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creation of the file resource has succeeded",
+            "headers": {
+              "Location": {
+                "description": "The location of the created file",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "/ultron/api/v1/files/9091afea-81ee-4003-ac76-2ac11e3ddc3f"
+              },
+              "Location-UUID": {
+                "schema": {
+                  "type": "uuid"
+                },
+                "description": "The UUID of the newly created object."
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/file/{fileUuid}": {
+      "parameters": [
+        {
+          "name": "fileUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get a file resource",
+        "description": "Get a file resource",
+        "operationId": "getFile",
+        "responses": {
+          "200": {
+            "description": "The file resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            },
+            "links": {
+              "data": {
+                "operationId": "getFileData",
+                "parameters": {
+                  "fileUuid": "$request.path.fileUuid"
+                }
+              },
+              "thumbnail": {
+                "operationId": "getFileThumbnail",
+                "parameters": {
+                  "fileUuid": "$request.path.fileUuid"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/file/{fileUuid}/data": {
+      "parameters": [
+        {
+          "name": "fileUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get a file resource data",
+        "description": "Get a file resource data",
+        "operationId": "getFileData",
+        "responses": {
+          "200": {
+            "description": "The file resource data",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileData"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/file/{fileUuid}/thumbnail": {
+      "parameters": [
+        {
+          "name": "fileUuid",
+          "in": "path",
+          "schema": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get a file resource thumbnail",
+        "description": "Get a file resource thumbnail",
+        "operationId": "getFileThumbnail",
+        "responses": {
+          "200": {
+            "description": "The file resource thumbnail",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileData"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/suggest-category": {
+      "post": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Suggest the chub-category of given objects.",
+        "description": "Suggest the chub-category of given objects.",
+        "operationId": "postAssetTrackingObjectSuggestChubCategory",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectUuidCategoryMap"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/suggest-rest-price": {
+      "post": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Suggested or set price of given objects.",
+        "description": "Suggested or set price of given objects.",
+        "operationId": "postAssetTrackingObjectSuggestChubPrice",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObjectUuidCategoryMap"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectUuidPriceMap"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/add-objects-to-circularity-hub": {
+      "post": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Add object to circularity-hub.",
+        "description": "Add object to circularity-hub.",
+        "operationId": "postAssetTrackingObjectChubAdd",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObjectUuidPriceAndCategoryMap"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/items": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPerPage"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Sorting"
+          }
+        ],
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Get all items from circularity-hub.",
+        "description": "Get all items from circularity-hub.",
+        "operationId": "getItemsFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CircularityHubItemFieldsWithValues"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/item/{identifier}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Get one item from circularity-hub.",
+        "description": "Get one item from circularity-hub.",
+        "operationId": "getOneItemFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircularityHubItemFieldsWithValues"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Delete one item.",
+        "description": "Delete one item-",
+        "operationId": "deleteOneItemFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Update one item.",
+        "description": "Update one item-",
+        "operationId": "updateOneItemFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "example": {
+                  "price": 123
+                },
+                "description": "If you want to update data from the object, please use the update object route instead.\n"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/orders": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PaginationPerPage"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Sorting"
+          }
+        ],
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Get all orders from circularity-hub.",
+        "description": "Get all orders from circularity-hub.",
+        "operationId": "getOrdersFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CircularityHubOrder"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Create order and checkout items from circularity-hub.",
+        "description": "Create order and checkout items from circularity-hub.",
+        "operationId": "createOrderOfItemsForCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "description": "A list of the chub item identifiers"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "success",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the newly created order."
+              },
+              "Location-ID": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "The ID of the newly created order."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customer-api/v1/circularity-hub/order/{identifier}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Get one order from circularity-hub.",
+        "description": "Get one order from circularity-hub.",
+        "operationId": "getOneOrderFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircularityHubOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "circularity-hub"
+        ],
+        "summary": "Update one order.",
+        "description": "Update one order.",
+        "operationId": "updateOneOrderFromCircularityHub",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "example": {
+                  "completed": true,
+                  "cancelled": true,
+                  "cancellation_reason": "Item could not be found any more"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptableError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "Request body is missing or invalid or request data is invalid."
+      },
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid."
+      },
+      "ForbiddenError": {
+        "description": "You are not permitted to perform the requested operation."
+      },
+      "NotFoundError": {
+        "description": "The requested resource could not be found."
+      },
+      "NotAcceptableError": {
+        "description": "The requested resource representation has no acceptable format."
+      },
+      "GoneError": {
+        "description": "The requested resource is no longer available at the server."
+      },
+      "TooManyRequestsError": {
+        "description": "Too many requests."
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error."
+      },
+      "ServiceUnavailable": {
+        "description": "Service unavailable"
+      },
+      "UnprocessableEntity": {
+        "description": "The requested entry is not processable."
+      }
+    },
+    "parameters": {
+      "PaginationPage": {
+        "name": "page",
+        "description": "Page number of the results to fetch.",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "PaginationPerPage": {
+        "name": "per_page",
+        "description": "The number of results per page.",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "Filter": {
+        "name": "filter",
+        "in": "query",
+        "required": false,
+        "style": "deepObject",
+        "schema": {
+          "$ref": "#/components/schemas/Filter"
+        }
+      },
+      "Sorting": {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/Sorting"
+        }
+      },
+      "TaskStatusFilter": {
+        "name": "status",
+        "in": "query",
+        "description": "Filter Tasks by status",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/TaskStatus"
+        }
+      },
+      "TaskDeadlineFromFilter": {
+        "name": "deadline_from",
+        "in": "query",
+        "description": "Filter Tasks by deadline from date",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date"
+        },
+        "example": "2023-04-01"
+      },
+      "TaskDeadlineToFilter": {
+        "name": "deadline_to",
+        "in": "query",
+        "description": "Filter Tasks by deadline to date",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date"
+        },
+        "example": "2023-05-01"
+      },
+      "TaskAssigneeFilter": {
+        "name": "assignee",
+        "in": "query",
+        "description": "Filter Tasks by assignee",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "TaskAuthorFilter": {
+        "name": "author",
+        "in": "query",
+        "description": "Filter Tasks by author",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "TaskReferenceTypeFilter": {
+        "name": "reference_type",
+        "in": "query",
+        "description": "Filter Tasks by reference type",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/TaskReferenceType"
+        }
+      }
+    },
+    "schemas": {
+      "Uuid": {
+        "type": "string",
+        "format": "uuid",
+        "nullable": false
+      },
+      "AuthLoginRequest": {
+        "type": "object",
+        "description": "The login credentials for the web API.",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Your login username for the web app.",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "description": "Your secret password.",
+            "minLength": 1
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client_id, request on [request](https://support.seventhings.com/kb-tickets/new)"
+          },
+          "grant_type": {
+            "enum": [
+              "password"
+            ]
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "client_id"
+        ],
+        "example": {
+          "username": "your username",
+          "password": "S3cR3tP4ßW0rD",
+          "client_id": "hash456789012345678901234567890123456789",
+          "grant_type": "password"
+        }
+      },
+      "RefreshTokenRequest": {
+        "type": "object",
+        "description": "The Request to retrieve a new OAuth-Token from a Refresh-Token.",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "description": "Your refresh token."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client_id, request on [request](https://support.seventhings.com/kb-tickets/new)"
+          },
+          "grant_type": {
+            "enum": [
+              "refresh_token"
+            ]
+          }
+        },
+        "required": [
+          "refresh_token",
+          "client_id",
+          "grant_type"
+        ],
+        "example": {
+          "refresh_token": "2b57a8d37baf1ef3a436968da51149b2eddf7f0f",
+          "client_id": "hash456789012345678901234567890123456789",
+          "grant_type": "refresh_token"
+        }
+      },
+      "SSOAuthCodeTokenRequest": {
+        "type": "object",
+        "description": "The Request to retrieve a new OAuth-Token from an sso authorization code.",
+        "properties": {
+          "provider_name": {
+            "$ref": "#/components/schemas/SSOProviderName"
+          },
+          "app_target": {
+            "$ref": "#/components/schemas/SSOAppTarget"
+          },
+          "auth_code": {
+            "type": "string",
+            "minLength": 1,
+            "example": "0.AU4AvAfVR74TOEesr5NM0atDfD8q_1GyO..."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client_id, request on [request](https://support.seventhings.com/kb-tickets/new)",
+            "example": "hash456789012345678901234567890123456789"
+          },
+          "grant_type": {
+            "enum": [
+              "sso_auth_code"
+            ],
+            "example": "sso_auth_code"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "provider_name",
+          "auth_code",
+          "client_id",
+          "grant_type"
+        ]
+      },
+      "AuthLoginOrRefreshTokenFormData": {
+        "type": "object",
+        "description": "You must provide either username, password and grant_type \"password\" or refresh_token and grant_type \"refresh_token\"",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Your login username for the web app."
+          },
+          "password": {
+            "type": "string",
+            "description": "Your secret password."
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "Your refresh token."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client_id, request on [request](https://support.seventhings.com/kb-tickets/new)"
+          },
+          "grant_type": {
+            "enum": [
+              "password",
+              "refresh_token"
+            ],
+            "description": "The `password` grant type"
+          }
+        },
+        "required": [
+          "client_id"
+        ]
+      },
+      "AccessAndRefreshTokenResponse": {
+        "type": "object",
+        "description": "A default OAuth2 with the Resource owner password credentials flow with some additional data.",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "example": "e68f38c2dca2add6c5528e16d7a2b453371e5870",
+            "description": "The access token to authenticate all restricted routes."
+          },
+          "expires_in": {
+            "type": "integer",
+            "example": 3600,
+            "description": "The seconds until the token expires."
+          },
+          "token_type": {
+            "type": "string",
+            "example": "Bearer",
+            "description": "This API only supports bearer tokens currently."
+          },
+          "scope": {
+            "type": "string",
+            "example": null,
+            "nullable": true,
+            "description": "The scope is currently not in use."
+          },
+          "refresh_token": {
+            "type": "string",
+            "example": "2b57a8d37baf1ef3a436968da51149b2eddf7f0f",
+            "description": "The refresh token is currently not in use."
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 1,
+            "description": "The unique identifier of the authenticated user."
+          }
+        }
+      },
+      "UserIsNotAllowedToLoginDetail": {
+        "type": "object",
+        "description": "Contains information on why the user is not allowed to login",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "enum": [
+              "LoginDeactivated",
+              "Banned",
+              "EmailUnconfirmed",
+              "Inactive",
+              "OnlySSOLoginAllowed"
+            ],
+            "example": "LoginDeactivated",
+            "description": "* `LoginDeactivated` - User is temporarily not allowed to login\n* `Banned` - User is banned\n* `EmailUnconfirmed` - User email is not confirmed yet\n* `Inactive` - User is not activated\n* `OnlySSOLoginAllowed` - User is sso user and only allowed to login with sso provider\n"
+          }
+        }
+      },
+      "SSOProviderName": {
+        "type": "string",
+        "enum": [
+          "azure-open-id-connect",
+          "google-open-id-connect",
+          "one-login-open-id-connect"
+        ],
+        "example": "azure-open-id-connect"
+      },
+      "SSOAppTarget": {
+        "type": "string",
+        "enum": [
+          "web",
+          "mobile"
+        ],
+        "example": "web"
+      },
+      "AssetTrackingFieldsWithValues": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "<field_key_1>": "<field_value_1>",
+          "<field_key_2>": "<field_value_2>",
+          "<field_key_3>": "<field_value_3>"
+        },
+        "description": "Fields defined in Template with its values, based on the type of the field.\nThere is a difference with what can be send via POST/PUT/PATCH requests,\nand what will be returned via GET\n\nThis examples shows what data can be expected for ceraint field type:\n\nPOST/PUT/PATCH\n```\n{\n    \"ATTACHMENT\": \"array<string (fileUuid)>\",\n    \"BARCODE\": \"string\",\n    \"DATE\": \"string (Y-m-d)\",\n    \"DATETIME\": \"string (Y-m-d\\TH:i:sP)\",\n    \"DECIMAL\": \"decimal (1.23)\",\n    \"DROPDOWN\": \"string\",\n    \"LINK\": \"string\",\n    \"LINKED_ASSET\": \"int (asset id) | string (asset uuid)\",\n    \"LINKED_LOCATION\": \"int (location id) | string (location uuid)\",\n    \"LINKED_ROOM\": \"int (room id)| string (room uuid)\",\n    \"LINKED_USER\": \"int (user id)| string (user uuid)\",\n    \"LINKED_PERSON\": \"int (person id)| string (person uuid)\",\n    \"LONG_TEXT\": \"string\",\n    \"MONEY\": \"decimal (1.23)\",\n    \"NUMBER\": \"int (123)\",\n    \"REMINDER\": \"string (Y-m-d)\",\n    \"TEXT\": \"string\",\n}\n```\n\nGET\n```\n{\n    \"ATTACHMENT\": [\n        {\n            \"uuid\": \"string (uuid)\",\n            \"type\": \"string\",\n            \"size\": \"int\",\n            \"data_uri\": \"string\",\n            \"file_uri\": \"string\",\n            \"thumbnail_uri\": \"string\",\n        }\n    ],\n    \"BARCODE\": \"string\",\n    \"DATE\": \"string (Y-m-d)\",\n    \"DATETIME\": \"string (Y-m-d\\TH:i:sP)\",\n    \"DECIMAL\": \"decimal (1.23)\",\n    \"DROPDOWN\": \"string\",\n    \"LINK\": \"string\",\n    \"LINKED_ASSET\": {\n        \"id\": \"int\",\n        \"uuid\": \"string (uuid)\",\n        \"display_name\": \"string\"\n    },\n    \"LINKED_LOCATION\": {\n        \"id\": \"int\",\n        \"uuid\": \"string (uuid)\",\n        \"display_name\": \"string\"\n    },\n    \"LINKED_ROOM\": {\n        \"id\": \"int\",\n        \"uuid\": \"string (uuid)\",\n        \"display_name\": \"string\"\n    },\n    \"LINKED_USER\": {\n        \"id\": \"int\",\n        \"uuid\": \"string (uuid)\",\n        \"display_name\": \"string\"\n    },\n    \"LINKED_PERSON\": {\n        \"id\": \"int\",\n        \"uuid\": \"string (uuid)\",\n        \"display_name\": \"string\"\n    },\n    \"LONG_TEXT\": \"string\",\n    \"MONEY\": \"decimal (1.23)\",\n    \"NUMBER\": \"int (123)\",\n    \"REMINDER\": \"string (Y-m-d)\",\n    \"TEXT\": \"string\",\n}\n```\n"
+      },
+      "CreateLocation": {
+        "type": "object",
+        "description": "Create a new location",
+        "properties": {
+          "fields": {
+            "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+          }
+        },
+        "required": [
+          "fields"
+        ]
+      },
+      "Location": {
+        "type": "object",
+        "description": "Location data",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+          }
+        },
+        "required": [
+          "uuid",
+          "fields"
+        ]
+      },
+      "UserList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/User"
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The message uuid",
+            "example": "f9f9f9f9-f9f9f9-f9f9f9-f9f9f9f9f9f9",
+            "nullable": false
+          },
+          "id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "email": {
+            "type": "string",
+            "description": "The users email",
+            "example": "user@example.com"
+          },
+          "firstname": {
+            "type": "string",
+            "nullable": true,
+            "description": "The users first name",
+            "example": "Max"
+          },
+          "lastname": {
+            "type": "string",
+            "nullable": true,
+            "description": "The users last name",
+            "example": "Miller"
+          },
+          "display_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The users display name of combined name",
+            "example": [
+              "Max Miller (user@example.com)",
+              "user@example.com"
+            ]
+          }
+        }
+      },
+      "UserId": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740992
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+          }
+        }
+      },
+      "PersonId": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740992
+      },
+      "CreatePerson": {
+        "type": "object",
+        "description": "Create a new person",
+        "properties": {
+          "fields": {
+            "$ref": "#/components/schemas/AssetTrackingFieldsWithValues"
+          }
+        },
+        "required": [
+          "fields"
+        ]
+      },
+      "CreateTask": {
+        "type": "object",
+        "description": "The payload for creating a new task.",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task.",
+            "example": "Refill the printer."
+          },
+          "comment": {
+            "type": "string",
+            "description": "A comment that is displayed in the task details.",
+            "example": "The printer is running low on ink.",
+            "nullable": true
+          },
+          "deadline": {
+            "type": "string",
+            "description": "The date and time of the deadline.",
+            "format": "date",
+            "example": "2022-04-01"
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskTimeInterval"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "recurring_schedule": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskTimeInterval"
+              }
+            ],
+            "nullable": true
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The uuids ids of the assignees.",
+              "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            },
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskReference"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The uuids ids of the attachments.",
+              "example": "7d8296ad-da7c-45f7-b676-9220b3a9d4dc"
+            },
+            "minItems": 0
+          },
+          "notify": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "deadline",
+          "assignees",
+          "references",
+          "reminders",
+          "recurring_schedule"
+        ]
+      },
+      "UpdateTask": {
+        "type": "object",
+        "description": "The payload for creating a new task.",
+        "additionalProperties": true,
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "The UUID of the task.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the task.",
+            "example": "Refill the printer."
+          },
+          "comment": {
+            "type": "string",
+            "description": "A comment that is displayed in the task details.",
+            "example": "The printer is running low on ink.",
+            "nullable": true
+          },
+          "deadline": {
+            "type": "string",
+            "description": "The date and time of the deadline.",
+            "format": "date",
+            "example": "2022-04-01"
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskTimeInterval"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "recurring_schedule": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskTimeInterval"
+              }
+            ],
+            "nullable": true
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The uuids ids of the assignees.",
+              "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            },
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskReference"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The uuids ids of the attachments.",
+              "example": "7d8296ad-da7c-45f7-b676-9220b3a9d4dc"
+            },
+            "minItems": 0
+          },
+          "notify": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "deadline",
+          "assignees",
+          "references",
+          "reminders",
+          "recurring_schedule"
+        ]
+      },
+      "Task": {
+        "type": "object",
+        "description": "A task is a reminder that is triggered at a specific date and time.",
+        "additionalProperties": false,
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "The UUID of the task.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "status": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskStatus"
+              }
+            ]
+          },
+          "author": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "The uuid of the author.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the task.",
+            "example": "Refill the printer."
+          },
+          "comment": {
+            "type": "string",
+            "description": "A comment that is displayed in the task details.",
+            "example": "The printer is running low on ink.",
+            "nullable": true
+          },
+          "deadline": {
+            "type": "string",
+            "description": "The date and time of the deadline.",
+            "format": "date",
+            "example": "2022-04-01"
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskTimeInterval"
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "recurring_schedule": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskTimeInterval"
+              }
+            ],
+            "nullable": true
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The uuids ids of the assignees.",
+              "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            },
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "references": {
+            "readOnly": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskReference"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAttachmentFile"
+            },
+            "minItems": 0
+          },
+          "slug": {
+            "type": "string",
+            "example": "TASK-132"
+          }
+        },
+        "required": [
+          "uuid",
+          "status",
+          "author",
+          "title",
+          "deadline",
+          "assignees",
+          "references",
+          "reminders",
+          "recurring_schedule",
+          "attachments",
+          "slug"
+        ]
+      },
+      "TaskReference": {
+        "type": "object",
+        "description": "The reference of the task.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TaskReferenceType"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the referenced object.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "name": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Display name of the referenced object.",
+            "example": "Assset name (asset barcode)"
+          },
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "description": "The id of the referenced object.",
+            "example": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskReferenceStatus"
+          }
+        },
+        "required": [
+          "type",
+          "uuid"
+        ]
+      },
+      "TaskAttachmentFile": {
+        "type": "object",
+        "description": "The file attachment of the task.",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "name": {
+            "$ref": "#/components/schemas/FileName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "size": {
+            "$ref": "#/components/schemas/FileSize"
+          },
+          "data_uri": {
+            "$ref": "#/components/schemas/FileUri"
+          },
+          "thumbnail_uri": {
+            "$ref": "#/components/schemas/FileUri"
+          }
+        }
+      },
+      "TaskStatus": {
+        "type": "string",
+        "description": "The type of the referenced object.",
+        "enum": [
+          "open",
+          "closed"
+        ],
+        "example": "closed"
+      },
+      "TaskReferenceType": {
+        "type": "string",
+        "description": "The type of the referenced object.",
+        "enum": [
+          "asset"
+        ],
+        "example": "asset"
+      },
+      "TaskReferenceStatus": {
+        "type": "string",
+        "description": "The status of the referenced object.",
+        "enum": [
+          "open",
+          "done"
+        ],
+        "example": "open"
+      },
+      "TaskTimeInterval": {
+        "type": "object",
+        "description": "A time interval that is used to trigger a task.",
+        "additionalProperties": false,
+        "properties": {
+          "unit": {
+            "type": "string",
+            "enum": [
+              "days",
+              "weeks",
+              "months",
+              "years"
+            ],
+            "description": "The unit of the time interval.",
+            "example": "weeks"
+          },
+          "value": {
+            "type": "integer",
+            "description": "The value of the time interval.",
+            "example": 2
+          }
+        },
+        "required": [
+          "unit",
+          "value"
+        ]
+      },
+      "CreateRentalCase": {
+        "type": "object",
+        "description": "The payload for creating a new rental case.",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "confirmed",
+              "borrowed",
+              "rejected",
+              "completed",
+              "return_overdue",
+              "pickup_overdue"
+            ],
+            "description": "The status of the rental case."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the rental case.",
+            "example": "Rent the printer."
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentalCaseReference"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-04-23",
+            "description": "The start of the rental case."
+          },
+          "issue_date_reminder": {
+            "type": "object",
+            "nullable": true,
+            "description": "The amount of time to send a reminder.",
+            "additionalProperties": false,
+            "properties": {
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "description": "The unit of the time interval.",
+                "example": "weeks"
+              },
+              "value": {
+                "type": "integer",
+                "description": "The value of the time interval.",
+                "example": 2
+              }
+            },
+            "required": [
+              "unit",
+              "value"
+            ]
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-04-23",
+            "description": "The start of the rental case."
+          },
+          "due_date_reminder": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": false,
+            "properties": {
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "description": "The unit of the time interval.",
+                "example": "weeks"
+              },
+              "value": {
+                "type": "integer",
+                "description": "The value of the time interval.",
+                "example": 2
+              }
+            },
+            "required": [
+              "unit",
+              "value"
+            ]
+          },
+          "responsible_user_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The uuid of the responsible user.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "renter": {
+            "type": "object",
+            "description": "The renter.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "plain",
+                  "user"
+                ],
+                "description": "The type of the renter.",
+                "example": "plain"
+              },
+              "value": {
+                "type": "string",
+                "description": "The value of the renter. In case of a user the uuid is given."
+              }
+            },
+            "required": [
+              "type",
+              "value"
+            ]
+          },
+          "comment": {
+            "type": "string",
+            "description": "A comment that is displayed in the rental case details.",
+            "example": "The printer is running low on ink.",
+            "nullable": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The uuids ids of the attachments.",
+              "example": "7d8296ad-da7c-45f7-b676-9220b3a9d4dc"
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "title",
+          "references",
+          "issue_date",
+          "due_date",
+          "responsible_user_uuid",
+          "attachments"
+        ]
+      },
+      "RentalCase": {
+        "type": "object",
+        "description": "The reference of the rental case.",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the rental case."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "confirmed",
+              "borrowed",
+              "rejected",
+              "completed",
+              "return_overdue",
+              "pickup_overdue"
+            ],
+            "description": "The status of the rental case."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the rental case.",
+            "example": "Rent the printer."
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentalCaseReference"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-04-23",
+            "description": "The start of the rental case."
+          },
+          "issue_date_reminder": {
+            "description": "The amount of time to send a reminder.",
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": false,
+            "properties": {
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "description": "The unit of the time interval.",
+                "example": "weeks"
+              },
+              "value": {
+                "type": "integer",
+                "description": "The value of the time interval.",
+                "example": 2
+              }
+            },
+            "required": [
+              "unit",
+              "value"
+            ]
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-04-23",
+            "description": "The start of the rental case."
+          },
+          "due_date_reminder": {
+            "description": "The amount of time to send a reminder.",
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": false,
+            "properties": {
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "description": "The unit of the time interval.",
+                "example": "weeks"
+              },
+              "value": {
+                "type": "integer",
+                "description": "The value of the time interval.",
+                "example": 2
+              }
+            },
+            "required": [
+              "unit",
+              "value"
+            ]
+          },
+          "responsible_user_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The uuid of the responsible user.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "renter": {
+            "type": "string",
+            "description": "The name of the renter.",
+            "example": "seventhings GmbH"
+          },
+          "comment": {
+            "type": "string",
+            "description": "A comment that is displayed in the rental case details.",
+            "example": "The printer is running low on ink.",
+            "nullable": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentalCaseAttachmentFile"
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "uuid",
+          "status",
+          "title",
+          "references",
+          "issue_date",
+          "due_date",
+          "responsible_user_uuid",
+          "attachments"
+        ]
+      },
+      "RentalCaseAuditLogEntry": {
+        "type": "object",
+        "description": "The audit log entry of a reminder event.",
+        "additionalProperties": false,
+        "properties": {
+          "rental_case_uuid": {
+            "type": "string",
+            "description": "The UUID of the reminder.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "The UUID of the user who triggered the event.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "occurred_at": {
+            "type": "string",
+            "description": "The date and time when the event was triggered.",
+            "format": "date-time",
+            "example": "2022-04-01T12:00:00+00:00"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "The name of the event.",
+            "example": "Field added"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the event that was triggered.",
+            "example": "System user added field 'scancode' to template 'location'."
+          },
+          "details": {
+            "type": "string",
+            "description": "Further details regarding the event, e.g. the JSON representation of the field. Can be empty.",
+            "example": ""
+          }
+        }
+      },
+      "RentalCaseReference": {
+        "type": "object",
+        "description": "The reference of the rental case.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/RentalCaseReferenceType"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the referenced object.",
+            "example": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+          },
+          "name": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Display name of the referenced object.",
+            "example": "Asset name (asset barcode)"
+          },
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "description": "The id of the referenced object.",
+            "example": 1
+          }
+        },
+        "required": [
+          "type",
+          "uuid"
+        ]
+      },
+      "RentalCaseReferenceType": {
+        "type": "string",
+        "description": "The type of the referenced object.",
+        "enum": [
+          "asset"
+        ],
+        "example": "asset"
+      },
+      "RentalCaseAttachmentFile": {
+        "type": "object",
+        "description": "The file attachment of the rental case.",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "name": {
+            "$ref": "#/components/schemas/FileName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "size": {
+            "$ref": "#/components/schemas/FileSize"
+          },
+          "data_uri": {
+            "$ref": "#/components/schemas/FileUri"
+          },
+          "thumbnail_uri": {
+            "$ref": "#/components/schemas/FileUri"
+          }
+        }
+      },
+      "AssetTrackingTemplate": {
+        "enum": [
+          "asset",
+          "room",
+          "person"
+        ],
+        "example": "room",
+        "description": "The template type of the asset tracking module"
+      },
+      "CreateFieldDefinition": {
+        "type": "object",
+        "description": "Create a new field definition",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FieldDefinitionTemplate"
+          }
+        ],
+        "required": [
+          "field_type",
+          "label",
+          "default_value",
+          "possible_values",
+          "attributes",
+          "relations"
+        ]
+      },
+      "FieldDefinitionTemplate": {
+        "type": "object",
+        "description": "A field definition template",
+        "properties": {
+          "field_type": {
+            "$ref": "#/components/schemas/FieldDefinitionFieldType"
+          },
+          "label": {
+            "$ref": "#/components/schemas/FieldDefinitionLabel"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/FieldDefinitionComment"
+          },
+          "default_value": {
+            "$ref": "#/components/schemas/FieldDefinitionDefaultValue"
+          },
+          "possible_values": {
+            "$ref": "#/components/schemas/FieldDefinitionPossibleValues"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/FieldDefinitionAttributes"
+          },
+          "relations": {
+            "$ref": "#/components/schemas/FieldDefinitionRelations"
+          }
+        },
+        "required": [
+          "field_type",
+          "label",
+          "attributes",
+          "relations"
+        ]
+      },
+      "FieldDefinition": {
+        "type": "object",
+        "description": "A field definition",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "field_key": {
+            "$ref": "#/components/schemas/FieldDefinitionFieldKey"
+          },
+          "field_type": {
+            "$ref": "#/components/schemas/FieldDefinitionFieldType"
+          },
+          "label": {
+            "$ref": "#/components/schemas/FieldDefinitionLabel"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/FieldDefinitionComment"
+          },
+          "default_value": {
+            "$ref": "#/components/schemas/FieldDefinitionDefaultValue"
+          },
+          "possible_values": {
+            "$ref": "#/components/schemas/FieldDefinitionPossibleValues"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/FieldDefinitionAttributes"
+          },
+          "relations": {
+            "$ref": "#/components/schemas/FieldDefinitionRelations"
+          }
+        },
+        "required": [
+          "uuid",
+          "field_key",
+          "field_type",
+          "label",
+          "attributes",
+          "relations"
+        ]
+      },
+      "FieldDefinitionFieldKey": {
+        "type": "string",
+        "description": "The key of the field",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "FieldDefinitionFieldType": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FieldTypeAttachment"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeBarcode"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeBoolean"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeDate"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeDateTime"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeDecimal"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeDropdown"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeFieldValueComparison"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLink"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLinkedAssets"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLinkedLocation"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLinkedRoom"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLinkedUser"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLinkedPerson"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeLongText"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeMoney"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeNumber"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeReminder"
+          },
+          {
+            "$ref": "#/components/schemas/FieldTypeText"
+          }
+        ]
+      },
+      "FieldTypeAttachment": {
+        "type": "object",
+        "description": "An attachment field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "ATTACHMENT"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeBarcode": {
+        "type": "object",
+        "description": "A barcode field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "BARCODE"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeBoolean": {
+        "type": "object",
+        "description": "A boolean field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "BOOLEAN"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeDate": {
+        "type": "object",
+        "description": "A date field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "DATE"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeDateTime": {
+        "type": "object",
+        "description": "A date-time field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "DATETIME"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeDecimal": {
+        "type": "object",
+        "description": "A decimal number field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "DECIMAL"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeDropdown": {
+        "type": "object",
+        "description": "A dropdown field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "DROPDOWN"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeFieldValueComparison": {
+        "type": "object",
+        "description": "A field value comparison field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "FIELD_VALUE_COMPARISON"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLink": {
+        "type": "object",
+        "description": "A link field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LINK"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLinkedAssets": {
+        "type": "object",
+        "description": "A linked assets field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LINKED_ASSETS"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLinkedLocation": {
+        "type": "object",
+        "description": "A linked building field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LINKED_LOCATION"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLinkedRoom": {
+        "type": "object",
+        "description": "A linked room field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LINKED_ROOM"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLinkedUser": {
+        "type": "object",
+        "description": "A linked user field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LINKED_USER"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLinkedPerson": {
+        "type": "object",
+        "description": "A linked person field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LINKED_PERSON"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeLongText": {
+        "type": "object",
+        "description": "A long text field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "LONG_TEXT"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeMoney": {
+        "type": "object",
+        "description": "A money field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "MONEY"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeNumber": {
+        "type": "object",
+        "description": "A number field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "NUMBER"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeReminder": {
+        "type": "object",
+        "description": "A reminder field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "REMINDER"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldTypeText": {
+        "type": "object",
+        "description": "A text field type",
+        "properties": {
+          "name": {
+            "enum": [
+              "TEXT"
+            ]
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/FieldValueConstraints"
+          }
+        },
+        "required": [
+          "name",
+          "constraints"
+        ]
+      },
+      "FieldUuidList": {
+        "type": "array",
+        "description": "An ordered list of field uuids",
+        "items": {
+          "$ref": "#/components/schemas/Uuid"
+        }
+      },
+      "FieldValueConstraints": {
+        "type": "array",
+        "description": "Array of field value constraints",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FieldValueAllowedValuesConstraint"
+            },
+            {
+              "$ref": "#/components/schemas/FieldValueDateConstraint"
+            },
+            {
+              "$ref": "#/components/schemas/FieldValueDateTimeConstraint"
+            },
+            {
+              "$ref": "#/components/schemas/FieldValueMinValueConstraint"
+            },
+            {
+              "$ref": "#/components/schemas/FieldValueMaxLengthConstraint"
+            },
+            {
+              "$ref": "#/components/schemas/FieldValueMaxValueConstraint"
+            },
+            {
+              "$ref": "#/components/schemas/FieldValueRegularExpressionConstraint"
+            }
+          ]
+        }
+      },
+      "FieldValueAllowedValuesConstraint": {
+        "type": "object",
+        "description": "A field value constraint that allows only certain values",
+        "properties": {
+          "type": {
+            "enum": [
+              "allowed_values"
+            ]
+          },
+          "value": {
+            "type": "array",
+            "description": "Array of allowed values",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldValueDateConstraint": {
+        "type": "object",
+        "description": "A field value constraint that allows only a certain date format",
+        "properties": {
+          "type": {
+            "enum": [
+              "date_format"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The date format"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldValueDateTimeConstraint": {
+        "type": "object",
+        "description": "A field value constraint that allows only a certain date-time format",
+        "properties": {
+          "type": {
+            "enum": [
+              "date_time_format"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The date-time format"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldValueMinValueConstraint": {
+        "type": "object",
+        "description": "A field value minimum value constraint",
+        "properties": {
+          "type": {
+            "enum": [
+              "min_value"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "description": "The minimum value"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldValueMaxLengthConstraint": {
+        "type": "object",
+        "description": "A field value max length constraint",
+        "properties": {
+          "type": {
+            "enum": [
+              "max_length"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "description": "The max length of the field value"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldValueMaxValueConstraint": {
+        "type": "object",
+        "description": "A field value maximum value constraint",
+        "properties": {
+          "type": {
+            "enum": [
+              "max_value"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "description": "The maximum value"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldValueRegularExpressionConstraint": {
+        "type": "object",
+        "description": "A field value regular expression constraint",
+        "properties": {
+          "type": {
+            "enum": [
+              "regular_expression"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The regular expression"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "FieldDefinitionLabel": {
+        "type": "string",
+        "description": "The label or translation key of the field",
+        "example": "general_information"
+      },
+      "FieldDefinitionComment": {
+        "type": "string",
+        "description": "The comment of the field",
+        "example": "Additional info about the field"
+      },
+      "FieldDefinitionDefaultValue": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "The default value of the field",
+        "nullable": true
+      },
+      "FieldDefinitionPossibleValues": {
+        "type": "array",
+        "description": "The possible values of the field",
+        "nullable": true,
+        "items": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "FieldDefinitionAttributes": {
+        "type": "array",
+        "description": "The attributes of the field",
+        "nullable": false,
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FieldAttributeFormGroup"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeEditable"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeInternal"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeMandatory"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeMutable"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeSystem"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeVisible"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributePreselected"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeIndexed"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeFormatted"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeSorted"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeCurrencyCode"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeFractionDigits"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeNameComponent"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeExposed"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeGenerated"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributeUnique"
+            },
+            {
+              "$ref": "#/components/schemas/FieldAttributePieChartOnDashboard"
+            }
+          ]
+        }
+      },
+      "FieldAttributeFormGroup": {
+        "type": "object",
+        "description": "The form group of a field",
+        "properties": {
+          "type": {
+            "enum": [
+              "form_group"
+            ]
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "form_group",
+          "value": "General"
+        }
+      },
+      "FieldAttributeEditable": {
+        "type": "object",
+        "description": "The editable attribute of a field",
+        "properties": {
+          "type": {
+            "enum": [
+              "editable"
+            ]
+          },
+          "value": {
+            "enum": [
+              "mobile_app",
+              "web_app"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "editable",
+          "value": "web_app"
+        }
+      },
+      "FieldAttributeInternal": {
+        "type": "object",
+        "description": "Whether the field is internal",
+        "properties": {
+          "type": {
+            "enum": [
+              "internal"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "internal",
+          "value": "no"
+        }
+      },
+      "FieldAttributeMandatory": {
+        "type": "object",
+        "description": "Whether the field is mandatory",
+        "properties": {
+          "type": {
+            "enum": [
+              "mandatory"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "mandatory",
+          "value": "no"
+        }
+      },
+      "FieldAttributeMutable": {
+        "type": "object",
+        "description": "Whether the field is mutable",
+        "properties": {
+          "type": {
+            "enum": [
+              "mutable"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "mutable",
+          "value": "yes"
+        }
+      },
+      "FieldAttributeSystem": {
+        "type": "object",
+        "description": "Whether the field is a system field",
+        "properties": {
+          "type": {
+            "enum": [
+              "system"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "system",
+          "value": "no"
+        }
+      },
+      "FieldAttributeVisible": {
+        "type": "object",
+        "description": "Visibility of the field",
+        "properties": {
+          "type": {
+            "enum": [
+              "visible"
+            ]
+          },
+          "value": {
+            "enum": [
+              "mobile_app",
+              "web_app_details_view",
+              "web_app_list_view"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "visible",
+          "value": "web_app_details_view"
+        }
+      },
+      "FieldAttributePreselected": {
+        "type": "object",
+        "description": "Preselect the field in the app",
+        "properties": {
+          "type": {
+            "enum": [
+              "preselected"
+            ]
+          },
+          "value": {
+            "enum": [
+              "mobile_app"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "preselected",
+          "value": "mobile_app"
+        }
+      },
+      "FieldAttributeIndexed": {
+        "type": "object",
+        "description": "Whether the field content is indexed",
+        "properties": {
+          "type": {
+            "enum": [
+              "indexed"
+            ]
+          },
+          "value": {
+            "enum": [
+              "search"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "indexed",
+          "value": "search"
+        }
+      },
+      "FieldAttributeFormatted": {
+        "type": "object",
+        "description": "The formatting of the field value",
+        "properties": {
+          "type": {
+            "enum": [
+              "formatted"
+            ]
+          },
+          "value": {
+            "enum": [
+              "user_as_email",
+              "user_as_firstname_lastname",
+              "user_as_lastname_firstname"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "formatted",
+          "value": "user_as_firstname_lastname"
+        }
+      },
+      "FieldAttributeSorted": {
+        "type": "object",
+        "description": "The sort direction of a list field",
+        "properties": {
+          "type": {
+            "enum": [
+              "sorted"
+            ]
+          },
+          "value": {
+            "enum": [
+              "ascending",
+              "descending"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "sorted",
+          "value": "ascending"
+        }
+      },
+      "FieldAttributeCurrencyCode": {
+        "type": "object",
+        "description": "The ISO 4217 currency code",
+        "properties": {
+          "type": {
+            "enum": [
+              "currency_code"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "currency_code",
+          "value": "EUR"
+        }
+      },
+      "FieldAttributeFractionDigits": {
+        "type": "object",
+        "description": "The number of fraction digits",
+        "properties": {
+          "type": {
+            "enum": [
+              "fraction_digits"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 20
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "fraction_digits",
+          "value": 2
+        }
+      },
+      "FieldAttributeNameComponent": {
+        "type": "object",
+        "description": "Whether the field is a name component",
+        "properties": {
+          "type": {
+            "enum": [
+              "name_component"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "name_component",
+          "value": "no"
+        }
+      },
+      "FieldAttributeGenerated": {
+        "type": "object",
+        "description": "Whether the field is generated to a specified location",
+        "properties": {
+          "type": {
+            "enum": [
+              "generated"
+            ]
+          },
+          "value": {
+            "enum": [
+              "on_create",
+              "on_update",
+              "on_import"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "generated",
+          "value": "on_create"
+        }
+      },
+      "FieldAttributeUnique": {
+        "type": "object",
+        "description": "Whether the field is unique to a specified entity",
+        "properties": {
+          "type": {
+            "enum": [
+              "unique"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "unique",
+          "value": "yes"
+        }
+      },
+      "FieldAttributePieChartOnDashboard": {
+        "type": "object",
+        "description": "When a field should be visible on dashboard",
+        "properties": {
+          "type": {
+            "enum": [
+              "piechart_on_dashboard"
+            ]
+          },
+          "value": {
+            "enum": [
+              "yes",
+              "no"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "piechart_on_dashboard",
+          "value": "no"
+        }
+      },
+      "FieldAttributeExposed": {
+        "type": "object",
+        "description": "Whether the field is exposed to a specified location",
+        "properties": {
+          "type": {
+            "enum": [
+              "exposed"
+            ]
+          },
+          "value": {
+            "enum": [
+              "mobile_app_api"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "example": {
+          "type": "exposed",
+          "value": "mobile_app_api"
+        }
+      },
+      "FieldDefinitionRelations": {
+        "type": "array",
+        "description": "The relations of the field",
+        "nullable": true,
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FieldRelationActualField"
+            },
+            {
+              "$ref": "#/components/schemas/FieldRelationExpectedField"
+            },
+            {
+              "$ref": "#/components/schemas/FieldRelationActiveWhenValueEqualsOneOf"
+            }
+          ]
+        }
+      },
+      "FieldRelationActualField": {
+        "type": "object",
+        "description": "The actual field of the relation",
+        "properties": {
+          "type": {
+            "enum": [
+              "actual_field"
+            ]
+          },
+          "field_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The uuid of the field"
+          }
+        },
+        "required": [
+          "type",
+          "field_uuid"
+        ]
+      },
+      "FieldRelationExpectedField": {
+        "type": "object",
+        "description": "The actual field of the relation",
+        "properties": {
+          "type": {
+            "enum": [
+              "expected_field"
+            ]
+          },
+          "field_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The uuid of the field"
+          }
+        },
+        "required": [
+          "type",
+          "field_uuid"
+        ]
+      },
+      "FieldRelationActiveWhenValueEqualsOneOf": {
+        "type": "object",
+        "description": "The actual field of the relation",
+        "properties": {
+          "type": {
+            "enum": [
+              "active_When_value_equals_one_of"
+            ]
+          },
+          "field_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The uuid of the field"
+          },
+          "comparison_values": {
+            "type": "array",
+            "description": "The values to compare with",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "type",
+          "field_uuid",
+          "comparison_values"
+        ]
+      },
+      "CreateFile": {
+        "type": "object",
+        "description": "Upload a file and create a file resource",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FileData"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "description": "A file resource",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "name": {
+            "$ref": "#/components/schemas/FileName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "size": {
+            "$ref": "#/components/schemas/FileSize"
+          },
+          "creator_id": {
+            "$ref": "#/components/schemas/CreatorId"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/CreatedAt"
+          },
+          "data_uri": {
+            "$ref": "#/components/schemas/FileUri"
+          },
+          "thumbnail_uri": {
+            "$ref": "#/components/schemas/FileUri"
+          }
+        },
+        "required": [
+          "uuid",
+          "name",
+          "type",
+          "size",
+          "creator_id",
+          "created_at",
+          "data_uri",
+          "thumbnail_uri"
+        ],
+        "example": {
+          "uuid": "9091afea-81ee-4003-ac76-2ac11e3ddc3f",
+          "name": "example.png",
+          "type": "image/png",
+          "size": 1234,
+          "creator_id": 1,
+          "created_at": "2022-09-11T13:35:00+00:00",
+          "data_uri": "https://example.seventhings.com/ultron/api/v1/files/9091afea-81ee-4003-ac76-2ac11e3ddc3f/data",
+          "thumbnail_uri": "https://example.seventhings.com/ultron/api/v1/files/9091afea-81ee-4003-ac76-2ac11e3ddc3f/thumbnail"
+        }
+      },
+      "FileData": {
+        "type": "string",
+        "format": "binary"
+      },
+      "FileName": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 255
+      },
+      "FileType": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 255
+      },
+      "FileSize": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 52428800,
+        "description": "File size in bytes"
+      },
+      "FileUri": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 1000
+      },
+      "CreatorId": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000000
+      },
+      "CreatedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "UpdatedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "MimeTypes": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "maxItems": 50,
+        "example": [
+          "image/png",
+          "image/jpeg",
+          "image/gif"
+        ]
+      },
+      "ObjectUuidList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Uuid"
+        },
+        "description": "A list of object uuids"
+      },
+      "ObjectUuidCategoryMap": {
+        "type": "object",
+        "description": "A map of object UUIDs with category",
+        "additionalProperties": true,
+        "example": {
+          "<object_uuid>": "<mapped_category>"
+        }
+      },
+      "ObjectUuidPriceMap": {
+        "type": "object",
+        "description": "A map of object UUIDs with prices",
+        "additionalProperties": true,
+        "example": {
+          "<object_uuid>": "<rest_price_value>"
+        }
+      },
+      "ObjectUuidPriceAndCategoryMap": {
+        "type": "object",
+        "description": "A map of object UUIDs with user given category and price",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/PriceAndCategoryMapData"
+        },
+        "example": {
+          "e8907bf9-90b3-4ea4-998c-242fab57d6a7": {
+            "category": "<value>",
+            "price": "<value>"
+          }
+        }
+      },
+      "PriceAndCategoryMapData": {
+        "type": "object",
+        "description": "Given category and price",
+        "additionalProperties": true,
+        "example": {
+          "category": "<value>",
+          "price": "<price>"
+        }
+      },
+      "CircularityHubItemFieldsWithValues": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "id": 1,
+          "deleted": 0,
+          "asset_id": 2,
+          "created_at": "2024-05-13 13:30:18",
+          "price": 123,
+          "category_id": 2,
+          "suggested_price": 2244.82,
+          "updated_at": "2024-05-13 13:30:18"
+        },
+        "description": "All object data of the circularity hub item are virtual. Means that the data comes from the current\ndata of the object. If you update the object, that data will change. Only mapped attributes will\nbe outputted by the api. For filter the data you can use the field names from\nAssetTrackingFieldsWithValues for example to filter for item_title you can use the mapped attribute\nlike inventory_name to set the filter like `?filter[inventory_name][like]=tisch`\n\nexample:\n{\n    \"id\": 1\n    \"deleted\": 0\n    \"asset_id\": 2\n    \"created_at\": \"2024-05-13 13:30:18\"\n    \"price\": 123\n    \"category_id\": 2\n    \"suggested_price\": 2244.82\n    \"updated_at\": \"2024-05-13 13:30:18\"\n    \"object_data\": {\n        \"item_image\": null\n        \"item_title\": \"Tisch Meetingraum\"\n        \"item_description\": \"Variante 1, inkl. 6. Stühle\"\n        \"item_main_category\": \"Möbel\"\n        \"item_actual_location\": 3\n        \"internal_identifier\": \"DEV0000002\"\n        \"item_original_purchase_date\": \"2021-07-08\"\n        \"item_original_purchase_price\": 3500.7\n        \"item_manufacturer\": \"Vitra\"\n        \"item_additional_link\": null\n        \"documents\": null\n        \"item_actual_room\": 3\n        \"item_status\": null\n        \"item_last_itexia_scan_date\": \"2024-04-22 09:44:41\"\n        \"item_last_itexia_update_date\": \"2024-05-06 07:28:14\"\n        \"serial_number\": null\n    }\n    \"permission\": 1\n}\n"
+      },
+      "FilterObject": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/Filter"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/Sorting"
+          }
+        }
+      },
+      "Filter": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "<filter_id>": "<filter_name>"
+        },
+        "description": "Fields are defined in Template, so this examples are based on the ~type~ of the field,\nnot on the FieldKey\n\nThe filter parameter is a deep object, which means that it can have multiple levels of nesting.\nIn the first level there is the field name, in the second level there is the operator and\nin the third level there are the values or the value.\nfor example: `filter[TEXT][eq]='exact searched text'`\n\nThe exact field name you can find in the field definition list of your customer instance.\n\nThe known operators which can be used for one value per field you can find here:\n- `eq` which is used for exact match\n- `neq` which is used for the opposite of an exact match\n- `gt` which is used for a greater than match\n- `gt_or_null` which is used for a greater than match or null\n- `gte` which is used for a greater than or equal match\n- `gte_or_null` which is used for a greater than or equal match or null\n- `lt` which is used for a less than match\n- `lt_or_null` which is used for a less than match or null\n- `lte` which is used for a less than or equal match\n- `lte_or_null` which is used for a less than or equal match or null\n\nHere is the list of the known operators which can be used for multiple values per field:\n- `like` which is used for a partial match\n- `not_like` which is used for a partial mismatch\n- `in` which is used for a list of exact matches\n- `nin` which is used for a list of the opposite of exact matches\n\nHere are some examples:\n- `filter[TEXT][eq]='exact searched text'`\n- `filter[TEXT][neq]='exact searched text'`\n- `filter[TEXT][like][]='searched text'`\n- `filter[TEXT][not_like][]='searched text'`\n- `filter[TEXT][in][]='searched text'`\n- `filter[TEXT][nin][]='searched text'`\n- `filter[DATE][gt]=2022-11-15`\n- `filter[DATE][gt_or_null]=2022-11-15`\n- `filter[DATE][gte]=2022-11-15`\n- `filter[DATE][gte_or_null]=2022-11-15`\n- `filter[DATE][lt]=2022-11-15&filter[DATE][gt]=2022-11-14`\n- `filter[DATE][lt_or_null]=2022-11-15&filter[DATE][gt]=2022-11-14`\n- `filter[DATE][lte]=2022-11-15&filter[DATE][gt]=2022-11-14`\n- `filter[DATE][lte_or_null]=2022-11-15&filter[DATE][gt]=2022-11-14`\n- `filter[DATETIME][gt]=2022-11-15+00:00:00`\n- `filter[DATETIME][lt]=2022-11-15+00:00:00&filter[DATETIME][gt]=2022-11-14+00:00:00`\n"
+      },
+      "Sorting": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "<sort_field>": "<sort_type>"
+        },
+        "description": "Fields are defined in Template, so this examples are based on the ~type~ of the field,\nnot on the FieldKey\n\nIn actual parameter, FieldKey should be passed (e.g: `sort[updated_at]=ASC`)\n\nUp to columns\n\nFilter options available for certain ~type~ of the field:\n- `sort[TEXT]=ASC`\n- `sort[DATE]=DESC`\n- `sort[TEXT]=DESC&sort[DATE]=ASC`\n"
+      },
+      "CircularityHubOrder": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "id": 1,
+          "order_number": "7THX-24-4570-61",
+          "created_at": "2024-05-29 13:02:20",
+          "user_id": 1,
+          "total_price": 152.56,
+          "completed": false,
+          "cancelled": true,
+          "cancellation_reason": "have to cancel because of problems",
+          "billing_data": {
+            "firstName": "User",
+            "lastName": "Seventhings",
+            "street": "Hainstraße",
+            "house_number": "2",
+            "zip_code": "01097",
+            "city": "Dresden"
+          },
+          "articles": [
+            {
+              "id": 1,
+              "deleted": 0,
+              "asset_id": 1,
+              "created_at": "2024-05-29 10:53:43",
+              "price": 152.56,
+              "category_id": 2,
+              "suggested_price": 152.56,
+              "updated_at": "2024-05-29 10:53:43",
+              "mappedAssetData": {
+                "item_image": [
+                  {
+                    "type": "image/jpeg",
+                    "name": "Example-Chair.jpg",
+                    "size": 157814,
+                    "name_on_server": "assets_600f4403392732.09849361.jpg"
+                  }
+                ],
+                "item_title": "Stuhl Meeting",
+                "item_description": "Alle Felder können individuell angepasst werden.",
+                "item_main_category": "Möbel",
+                "item_actual_location": 1,
+                "internal_identifier": "DEV0000004",
+                "item_original_purchase_date": "2020-11-02",
+                "item_original_purchase_price": 279.9,
+                "item_manufacturer": "Vitra",
+                "documents": null,
+                "item_actual_room": 3,
+                "item_last_itexia_update_date": "2024-05-28 08:20:29"
+              }
+            }
+          ]
+        },
+        "description": "Inside the `mappedAssetData` you can find all currently mapped data from the original object\nIf the object was deleted from the system\nthere is a cache with the data from the creation date of the order.\n"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter the token with the `Bearer: ` prefix, e.g. \"Bearer abcde12345\"."
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

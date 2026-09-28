@@ -1,0 +1,62 @@
+name: Update SDK pins
+on:
+  schedule:
+    - cron: '20 7 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: update-sdk-pins
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: starters/go/go.sum
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+      - name: Update pins and lockfiles
+        run: |
+          for language in typescript python go php; do
+            python scripts/update-sdk.py "$language" latest
+          done
+      - name: Verify candidate dependency set
+        run: |
+          npm --prefix starters/typescript ci
+          npm --prefix starters/typescript run check
+          npm --prefix starters/typescript run build
+          python -m venv starters/python/.venv
+          starters/python/.venv/bin/python -m pip install --require-hashes -r starters/python/requirements.txt
+          starters/python/.venv/bin/python -m compileall -q starters/python/main.py
+          (cd starters/go && go vet ./... && go test ./...)
+          composer --working-dir=starters/php install --no-interaction --prefer-dist
+          composer --working-dir=starters/php validate --no-check-publish
+          composer --working-dir=starters/php check
+          python scripts/check.py
+          for language in typescript python go php; do
+            python scripts/test-starter.py "$language"
+          done
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/sdk-pins
+          commit-message: 'chore: update tested SDK dependencies'
+          title: 'Update tested SDK dependencies'
+          body: 'Updates SDK package pins, source revisions, and lockfiles together. Offline checks passed in the update workflow. Review interface/runtime changes and run relevant AI evaluations before merging.'
+          add-paths: |
+            sdk-manifest.json
+            starters/

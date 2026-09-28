@@ -1,0 +1,43 @@
+name: Update API reference
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Full customer-api-docs commit SHA
+        required: true
+        type: string
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: update-api-reference
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/checkout@v4
+        with:
+          repository: seventhingsCompany/customer-api-docs
+          ref: ${{ inputs.revision }}
+          token: ${{ secrets.SDK_DOCS_READ_TOKEN || github.token }}
+          path: .workspace/docs
+      - name: Regenerate pinned reference
+        env:
+          DOCS_REVISION: ${{ inputs.revision }}
+        run: |
+          python scripts/refresh-reference.py --checkout .workspace/docs --revision "$DOCS_REVISION"
+          python scripts/check.py
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/api-reference
+          commit-message: 'docs: update pinned API reference'
+          title: 'Update pinned API reference'
+          body: 'Regenerated the full API schema, endpoint index, checksum, and manifest provenance from the selected documentation commit. Review API differences and affected integration guidance before merging.'
+          add-paths: |
+            sdk-manifest.json
+            reference/
