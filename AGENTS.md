@@ -2,7 +2,7 @@
 
 ## Workflow
 
-1. Identify the user's language and desired integration. If unspecified, ask which language fits their project.
+1. Identify the user's language and desired integration. If unspecified, use the "Choose your SDK" guide in `README.md`: ask about their existing stack, task, deployment environment, and team experience, then recommend a suitable starter. Prefer an existing team language over introducing a new one.
 2. Read `starters/<language>/README.md`, `context/languages/<language>.md`, and that starter's entry point.
 3. Read the relevant recipe in `recipes/` and only the context needed for the task.
 4. Use the installed SDK's public interfaces. Match the version in `sdk-manifest.json`; method names and return types differ across languages.
@@ -11,6 +11,7 @@
 
 ## Context routing
 
+- Language selection: `README.md` → "Choose your SDK"
 - API concepts and pagination: `context/api-concepts.md`
 - Authentication and configuration: `context/authentication.md`
 - Instance-specific fields: `context/dynamic-fields.md`
