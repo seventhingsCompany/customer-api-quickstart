@@ -8,7 +8,7 @@
   },
   "reference": {
     "repository": "https://github.com/seventhingsCompany/customer-api-docs.git",
-    "revision": "06bc24eff95421291f867e379ca9fe948ef4c8d4",
+    "revision": "86387c26a92a2a2203e6981b7e870c634307fec4",
     "path": "src/schemas/customer-api.json",
     "documentation": "https://api.seventhings.com/"
   }
