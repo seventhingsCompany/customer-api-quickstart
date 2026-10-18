@@ -6,8 +6,10 @@ import os
 import sys
 from pathlib import Path
 
-from seventhings import Client
+from seventhings import APIError, Client
 from seventhings.models import FileAttachment, HistoryListOptions, ListOptions, like
+
+NOT_FOUND_EXIT = 3
 
 
 def required(key):
@@ -28,7 +30,7 @@ def output(value):
 
 def run(client, action):
     options = ListOptions(page=1, per_page=100)
-    if os.environ.get("SEVENTHINGS_FILTER_FIELD"):
+    if os.environ.get("SEVENTHINGS_FILTER_FIELD") or os.environ.get("SEVENTHINGS_FILTER_VALUE"):
         options = options.where(
             like(required("SEVENTHINGS_FILTER_FIELD"), required("SEVENTHINGS_FILTER_VALUE"))
         )
@@ -44,7 +46,14 @@ def run(client, action):
         for obj in client.objects.all(options):
             output(dict(obj))
     elif action == "lookup":
-        output(client.objects.get_by_barcode(required("SEVENTHINGS_BARCODE")))
+        barcode = required("SEVENTHINGS_BARCODE")
+        try:
+            output(client.objects.get_by_barcode(barcode))
+        except APIError as error:
+            if not error.is_not_found:
+                raise
+            print(f"No object found for barcode: {barcode}", file=sys.stderr)
+            sys.exit(NOT_FOUND_EXIT)
     elif action in ("create", "update"):
         fields = json.loads(Path(required("SEVENTHINGS_PAYLOAD_FILE")).read_text())
         if not isinstance(fields, dict):
@@ -61,9 +70,11 @@ def run(client, action):
     elif action == "attach":
         uuid = required("SEVENTHINGS_OBJECT_UUID")
         field = required("SEVENTHINGS_ATTACHMENT_FIELD")
-        path = Path(required("SEVENTHINGS_FILE"))
-        with path.open("rb") as stream:
-            file_uuid = client.files.upload(path.name, stream)
+        file_uuid = os.environ.get("SEVENTHINGS_FILE_UUID")
+        if not file_uuid:
+            path = Path(required("SEVENTHINGS_FILE"))
+            with path.open("rb") as stream:
+                file_uuid = client.files.upload(path.name, stream)
         result = client.objects.add_files(uuid, [FileAttachment(field, file_uuid)])
         output({"fileUuid": file_uuid, "status": result.status_code, "body": result.json()})
         if result.status_code == 207:

@@ -9,7 +9,9 @@
 | Barcode not found | Pass the raw barcode; lookup includes archived objects. Treat a missing object separately from auth/network failures in application logic. |
 | Missing required fields / validation error | Fetch that instance's field definitions; verify field keys, values, and constraints. |
 | Only 100 exported rows | Use `export`, not `hello`; `hello` intentionally fetches one page. |
-| Attachment exits nonzero with status 207 | Inspect the printed result and reuse the returned file UUID when repairing the link. |
+| Attachment exits nonzero with status 207 | Inspect the printed result, then rerun `attach` with `SEVENTHINGS_FILE_UUID` set to the printed `fileUuid` to repair the link without uploading again. |
+| `lookup` exits 3 | No object has that barcode (archived objects included). Exit 1 means an authentication, network, or other API error. |
+| `Set SEVENTHINGS_FILTER_...` | Set both filter variables, or clear both to export everything. |
 | 429 Too Many Requests | Another client or process is using the same instance. Read the error's Retry-After value, wait, and resend only idempotent reads automatically. Lower the client's rate limit for concurrent jobs. |
 | Export or batch slower than expected | The SDK paces requests at 200 per minute by default. Allow time for the page count, and extend task deadlines (the Go starter uses five minutes). |
 | PHP platform requirement failure | Use PHP 8.5+; the pinned SDK requires it. It is available through Packagist. |

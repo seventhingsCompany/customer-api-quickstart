@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,6 +22,13 @@ func required(key string) string {
 }
 
 func output(value any) error { return json.NewEncoder(os.Stdout).Encode(value) }
+
+const notFoundExit = 3
+
+// notFoundError marks a missing object so main can exit with notFoundExit.
+type notFoundError struct{ barcode string }
+
+func (e notFoundError) Error() string { return "no object found for barcode: " + e.barcode }
 
 func run() error {
 	action := "hello"
@@ -46,8 +54,8 @@ func run() error {
 		}
 	}
 	opts := &models.ListOptions{Page: 1, PerPage: 100}
-	if field := os.Getenv("SEVENTHINGS_FILTER_FIELD"); field != "" {
-		opts.Filters = []models.FilterEntry{{Field: field, Operator: models.FilterLike, Values: []string{required("SEVENTHINGS_FILTER_VALUE")}}}
+	if os.Getenv("SEVENTHINGS_FILTER_FIELD") != "" || os.Getenv("SEVENTHINGS_FILTER_VALUE") != "" {
+		opts.Filters = []models.FilterEntry{{Field: required("SEVENTHINGS_FILTER_FIELD"), Operator: models.FilterLike, Values: []string{required("SEVENTHINGS_FILTER_VALUE")}}}
 	}
 	switch action {
 	case "hello":
@@ -74,7 +82,12 @@ func run() error {
 			}
 		}
 	case "lookup":
-		obj, err := c.ObjectGetByBarcode(ctx, required("SEVENTHINGS_BARCODE"))
+		barcode := required("SEVENTHINGS_BARCODE")
+		obj, err := c.ObjectGetByBarcode(ctx, barcode)
+		var apiErr *models.APIError
+		if errors.As(err, &apiErr) && apiErr.IsNotFound() {
+			return notFoundError{barcode}
+		}
 		if err != nil {
 			return err
 		}
@@ -113,15 +126,17 @@ func run() error {
 	case "attach":
 		uuid := required("SEVENTHINGS_OBJECT_UUID")
 		field := required("SEVENTHINGS_ATTACHMENT_FIELD")
-		path := required("SEVENTHINGS_FILE")
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		fileUUID, err := c.FileUpload(ctx, filepath.Base(path), f)
-		if err != nil {
-			return err
+		fileUUID := os.Getenv("SEVENTHINGS_FILE_UUID")
+		if fileUUID == "" {
+			path := required("SEVENTHINGS_FILE")
+			f, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			if fileUUID, err = c.FileUpload(ctx, filepath.Base(path), f); err != nil {
+				return err
+			}
 		}
 		resp, err := c.ObjectAddFiles(ctx, uuid, []models.FileAttachment{{FieldKey: field, FileUUID: fileUUID}})
 		if err != nil {
@@ -162,6 +177,9 @@ func main() {
 	}()
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		if errors.As(err, new(notFoundError)) {
+			os.Exit(notFoundExit)
+		}
 		os.Exit(1)
 	}
 }
