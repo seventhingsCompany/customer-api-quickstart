@@ -8,6 +8,7 @@ Read `starters/typescript/main.ts`. Package: `@seventhingscompany/customer-api`,
 - `client.fieldDefinitions.list('asset')` returns definitions.
 - `client.objects.history(uuid, options)` returns camelCase pagination fields.
 - `client.objects.addFiles` returns `{status, body}`; inspect status 207.
+- The `rateLimit` client option sets requests per minute (default `DEFAULT_REQUESTS_PER_MINUTE`, 200; zero or less disables). `ApiError.retryAfter()` returns milliseconds or `undefined`; `isRateLimited(err)` detects 429.
 
 Checks: `npm ci`, `npm run check`, `npm run build`. Run with `npm start -- <action>`; for clean JSON redirection use `node dist/main.js <action>`.
 

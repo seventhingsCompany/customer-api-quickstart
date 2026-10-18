@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import { SeventhingsClient, Filter, type ListOptions } from '@seventhingscompany/customer-api';
+import { SeventhingsClient, Filter, isNotFound, type ListOptions } from '@seventhingscompany/customer-api';
 
 function required(key: string): string {
   const value = process.env[key];
@@ -8,6 +8,7 @@ function required(key: string): string {
   return value;
 }
 const output = (value: unknown) => console.log(JSON.stringify(value));
+const NOT_FOUND_EXIT = 3;
 
 async function main() {
   const action = process.argv[2] ?? 'hello';
@@ -20,7 +21,7 @@ async function main() {
     ? new SeventhingsClient({ instanceUrl, token })
     : await SeventhingsClient.withCredentials({ instanceUrl, username: required('SEVENTHINGS_USERNAME'), password: required('SEVENTHINGS_PASSWORD'), clientId: required('SEVENTHINGS_CLIENT_ID') });
   const options: ListOptions = { page: 1, perPage: 100 };
-  if (process.env.SEVENTHINGS_FILTER_FIELD) {
+  if (process.env.SEVENTHINGS_FILTER_FIELD || process.env.SEVENTHINGS_FILTER_VALUE) {
     options.filters = [Filter.like(required('SEVENTHINGS_FILTER_FIELD'), required('SEVENTHINGS_FILTER_VALUE'))];
   }
   switch (action) {
@@ -30,7 +31,17 @@ async function main() {
     case 'export':
       for await (const obj of client.objects.all(options)) output(obj.data);
       break;
-    case 'lookup': output(await client.objects.getByBarcode(required('SEVENTHINGS_BARCODE'))); break;
+    case 'lookup': {
+      const barcode = required('SEVENTHINGS_BARCODE');
+      try {
+        output(await client.objects.getByBarcode(barcode));
+      } catch (error) {
+        if (!isNotFound(error)) throw error;
+        console.error(`No object found for barcode: ${barcode}`);
+        process.exitCode = NOT_FOUND_EXIT;
+      }
+      break;
+    }
     case 'create':
     case 'update': {
       const fields: unknown = JSON.parse(await readFile(required('SEVENTHINGS_PAYLOAD_FILE'), 'utf8'));
@@ -50,8 +61,11 @@ async function main() {
     case 'attach': {
       const uuid = required('SEVENTHINGS_OBJECT_UUID');
       const fieldKey = required('SEVENTHINGS_ATTACHMENT_FIELD');
-      const path = required('SEVENTHINGS_FILE');
-      const fileUuid = await client.files.upload(basename(path), await readFile(path));
+      let fileUuid = process.env.SEVENTHINGS_FILE_UUID;
+      if (!fileUuid) {
+        const path = required('SEVENTHINGS_FILE');
+        fileUuid = await client.files.upload(basename(path), await readFile(path));
+      }
       const result = await client.objects.addFiles(uuid, [{ fieldKey, fileUuid }]);
       output({ fileUuid, ...result });
       if (result.status === 207) throw new Error('Partial attachment result; inspect output before retrying');

@@ -67,10 +67,10 @@ All four starters accept the same action names and environment variables:
 | `export` | [Export all matching objects](recipes/export-inventory.md) as JSON Lines | Optional filter pair |
 | `lookup` | [Find by raw barcode](recipes/find-by-barcode.md) | `SEVENTHINGS_BARCODE` |
 | `create` / `update` | [Create or patch an object](recipes/create-or-update.md) | `SEVENTHINGS_PAYLOAD_FILE`; UUID for update |
-| `attach` | [Upload and attach a file](recipes/attach-file.md) | UUID, `SEVENTHINGS_FILE`, `SEVENTHINGS_ATTACHMENT_FIELD` |
+| `attach` | [Upload and attach a file](recipes/attach-file.md) | UUID, `SEVENTHINGS_FILE` (or `SEVENTHINGS_FILE_UUID`), `SEVENTHINGS_ATTACHMENT_FIELD` |
 | `history` | [Read all object history](recipes/change-history.md) as JSON Lines | `SEVENTHINGS_OBJECT_UUID` |
 
-Filter pair: `SEVENTHINGS_FILTER_FIELD` and `SEVENTHINGS_FILTER_VALUE` (substring matching). Paths are relative to your current directory. `create`, `update`, and `attach` perform writes; `hello` performs reads. Commands return nonzero on failure, including partial attachment responses.
+Filter pair: `SEVENTHINGS_FILTER_FIELD` and `SEVENTHINGS_FILTER_VALUE` (substring matching); setting only one is an error. Paths are relative to your current directory. `create`, `update`, and `attach` perform writes; `hello` performs reads. Commands return nonzero on failure, including partial attachment responses. `lookup` exits 3 when no object has the barcode and 1 for other failures.
 
 ## Make it your own
 

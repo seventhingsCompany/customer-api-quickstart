@@ -4,11 +4,14 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Seventhings\Client;
+use Seventhings\Models\ApiException;
 use Seventhings\Models\Enums\AssetTrackingTemplate;
 use Seventhings\Models\FileAttachment;
 use Seventhings\Models\FilterEntry;
 use Seventhings\Models\HistoryListOptions;
 use Seventhings\Models\ListOptions;
+
+const NOT_FOUND_EXIT = 3;
 
 function required(string $key): string {
     $value = getenv($key);
@@ -27,7 +30,7 @@ function main(string $action): void {
     $client = $token ? Client::withToken($url, $token) : Client::withCredentials(
         $url, required('SEVENTHINGS_USERNAME'), required('SEVENTHINGS_PASSWORD'), required('SEVENTHINGS_CLIENT_ID')
     );
-    $filters = getenv('SEVENTHINGS_FILTER_FIELD') ? [FilterEntry::like(required('SEVENTHINGS_FILTER_FIELD'), required('SEVENTHINGS_FILTER_VALUE'))] : [];
+    $filters = getenv('SEVENTHINGS_FILTER_FIELD') || getenv('SEVENTHINGS_FILTER_VALUE') ? [FilterEntry::like(required('SEVENTHINGS_FILTER_FIELD'), required('SEVENTHINGS_FILTER_VALUE'))] : [];
     $options = new ListOptions(page: 1, perPage: 100, filters: $filters);
     switch ($action) {
         case 'hello':
@@ -36,7 +39,15 @@ function main(string $action): void {
         case 'export':
             foreach ($client->objects->all($options) as $object) { output($object->data); }
             break;
-        case 'lookup': output($client->objects->getByBarcode(required('SEVENTHINGS_BARCODE'))); break;
+        case 'lookup':
+            $barcode = required('SEVENTHINGS_BARCODE');
+            try { output($client->objects->getByBarcode($barcode)); }
+            catch (ApiException $error) {
+                if (!$error->isNotFound()) { throw $error; }
+                fwrite(STDERR, "No object found for barcode: $barcode" . PHP_EOL);
+                exit(NOT_FOUND_EXIT);
+            }
+            break;
         case 'create':
         case 'update':
             $data = file_get_contents(required('SEVENTHINGS_PAYLOAD_FILE'));
@@ -57,11 +68,14 @@ function main(string $action): void {
         case 'attach':
             $uuid = required('SEVENTHINGS_OBJECT_UUID');
             $field = required('SEVENTHINGS_ATTACHMENT_FIELD');
-            $path = required('SEVENTHINGS_FILE');
-            $stream = fopen($path, 'rb');
-            if ($stream === false) { throw new RuntimeException('Cannot open upload file'); }
-            try { $fileUuid = $client->files->upload(basename($path), $stream); }
-            finally { if (is_resource($stream)) { fclose($stream); } }
+            $fileUuid = getenv('SEVENTHINGS_FILE_UUID');
+            if ($fileUuid === false || $fileUuid === '') {
+                $path = required('SEVENTHINGS_FILE');
+                $stream = fopen($path, 'rb');
+                if ($stream === false) { throw new RuntimeException('Cannot open upload file'); }
+                try { $fileUuid = $client->files->upload(basename($path), $stream); }
+                finally { if (is_resource($stream)) { fclose($stream); } }
+            }
             $result = $client->objects->addFiles($uuid, [new FileAttachment($field, $fileUuid)]);
             output(['fileUuid' => $fileUuid, 'status' => $result->statusCode, 'body' => $result->json()]);
             if ($result->statusCode === 207) { throw new RuntimeException('Partial attachment result; inspect output before retrying'); }

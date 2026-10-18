@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 OBJECT_UUID = "00000000-0000-4000-8000-000000000001"
 FILE_UUID = "00000000-0000-4000-8000-000000000002"
+EXISTING_FILE_UUID = "00000000-0000-4000-8000-000000000003"
 OBJECTS = [
     {"uuid": f"object-{i}", "custom_label": f"Laptop {i}", "custom_nested": {"active": True}}
     for i in range(101)
@@ -137,6 +138,10 @@ def main():
     starter = ROOT / "starters" / args.language
     with tempfile.TemporaryDirectory(prefix="customer-api-") as temporary:
         temp = Path(temporary)
+        # Commands run from the starter directory; anchor relative interpreter paths here.
+        # abspath, not resolve: following a venv symlink would leave the venv.
+        if args.python and os.sep in args.python:
+            args.python = os.path.abspath(args.python)
         python = args.python or str(
             ROOT
             / "starters/python/.venv"
@@ -175,7 +180,7 @@ def main():
             }
         )
 
-        def run(action, success=True, overrides=None):
+        def run(action, success=True, overrides=None, code=None):
             Fixture.requests.clear()
             result = subprocess.run(
                 commands[args.language] + [action],
@@ -186,7 +191,7 @@ def main():
                 timeout=30,
                 check=False,
             )
-            assert (result.returncode == 0) == success, (
+            assert (result.returncode == 0) == success and code in (None, result.returncode), (
                 f"{action}: exit {result.returncode}\n{result.stdout}\n{result.stderr}"
             )
             assert "fixture-password" not in result.stdout + result.stderr, "Password leaked"
@@ -225,8 +230,13 @@ def main():
                 and "like" in json.dumps(q)
                 for q in queries
             )
+            for half in ("SEVENTHINGS_FILTER_FIELD", "SEVENTHINGS_FILTER_VALUE"):
+                run("export", False, {half: "Laptop"}, code=1)
+                assert not any(r[1].endswith("/objects") for r in Fixture.requests), (
+                    f"Exported without a complete filter ({half} only)"
+                )
             assert run("lookup") == [OBJECTS[0]]
-            run("lookup", False, {"SEVENTHINGS_BARCODE": "missing"})
+            assert run("lookup", False, {"SEVENTHINGS_BARCODE": "missing"}, code=3) == []
             assert run("create") == [{"uuid": OBJECT_UUID}]
             created = [r for r in Fixture.requests if r[0] == "POST"]
             assert json.loads(created[0][3]) == {"custom_label": "Created from fixture"}
@@ -248,10 +258,22 @@ def main():
             Fixture.partial = True
             assert run("attach", False)[0]["status"] == 207
             Fixture.partial = False
+            repaired = run(
+                "attach",
+                overrides={"SEVENTHINGS_FILE": "", "SEVENTHINGS_FILE_UUID": EXISTING_FILE_UUID},
+            )[0]
+            assert repaired["fileUuid"] == EXISTING_FILE_UUID
+            assert [r[1] for r in Fixture.requests if r[0] == "POST"] == [
+                f"/customer-api/v1/object/{OBJECT_UUID}/add-file"
+            ], "Uploaded again despite SEVENTHINGS_FILE_UUID"
+            assert json.loads(Fixture.requests[-1][3]) == [
+                {"field-key": "custom_documents", "file-uuid": EXISTING_FILE_UUID}
+            ]
             assert run("history") == OBJECTS
             assert len(Fixture.requests) == 2
             Fixture.unauthorized = True
-            run("export", False)
+            run("export", False, code=1)
+            run("lookup", False, code=1)
             Fixture.unauthorized = False
             run("hello", False, {"SEVENTHINGS_INSTANCE_URL": ""})
             assert not Fixture.requests
