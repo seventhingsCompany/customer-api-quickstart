@@ -8,7 +8,7 @@ AI prompt:
 2. Optionally set `SEVENTHINGS_FILTER_FIELD` and `SEVENTHINGS_FILTER_VALUE` together. Leave both empty to export all objects.
 3. Run `export` using your [starter command](../README.md#start-here), redirecting stdout to `inventory.jsonl`.
 
-Each line is one complete object. The implementation streams SDK iterator results instead of accumulating the entire inventory. Check the command exit status before consuming the export: a failure can leave a partial file. For recurring exports, write a temporary file and rename it only after success.
+Each line is one complete object. The implementation streams SDK iterator results instead of accumulating the entire inventory. Check the command exit status before consuming the export: a failure can leave a partial file. For recurring exports, write a temporary file and rename it only after success. The SDK's default limit of 200 requests per minute paces each 100-object page; see [rate limiting](../context/api-concepts.md#rate-limiting).
 
 Verification: `python3 scripts/test-starter.py <language>` exercises a 101-object, two-page export, verifies filter propagation on both requests, and checks preservation of nested custom fields.
 

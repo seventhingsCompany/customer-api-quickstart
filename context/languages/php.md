@@ -8,5 +8,6 @@ Read `starters/php/main.php`. Package: `seventhings/customer-api-php` on Packagi
 - Use `AssetTrackingTemplate::Asset` for field definitions.
 - Use `FilterEntry::like` and named `ListOptions` arguments.
 - Attachment responses expose `statusCode` and `json()`.
+- `withToken`/`withCredentials` accept `requestsPerMinute:` (default `RateLimiter::DEFAULT_REQUESTS_PER_MINUTE`, 200; zero disables). `ApiException::retryAfter()` returns whole seconds or null; `isRateLimited()` detects 429.
 
 Checks: `composer validate --no-check-publish`, `composer check`, and the shared offline suite. Run: `php main.php <action>`. Install with `composer install`; no GitHub SSH repository entry is needed.

@@ -7,6 +7,7 @@ Read `starters/python/main.py`. Distribution: `seventhings-customer-api`; import
 - Use `ListOptions(...).where(like(field, value))`; option names use `per_page`.
 - `client.field_definitions.list('asset')` returns dataclasses.
 - Attachment responses expose `status_code` and `json()`.
+- `Client(...)` and `Client.with_credentials(...)` accept `rate_limit=` requests per minute (default `DEFAULT_REQUESTS_PER_MINUTE`, 200; `0` or `None` disables). `APIError.retry_after()` returns a `timedelta` or `None`; the `is_rate_limited` property detects 429 (`is_not_found` and similar checks are properties too).
 - For async applications use `AsyncClient`, `await` SDK calls, and `async for` on iterators; do not mix sync network calls into an async request handler.
 
 Install `requirements.txt` in a virtual environment. Compile check: `python -m compileall -q main.py`. Run: `python main.py <action>`. Use the shared offline suite for actual request/response verification.

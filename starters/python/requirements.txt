@@ -32,9 +32,9 @@ idna==3.20 \
     # via
     #   anyio
     #   httpx
-seventhings-customer-api==1.4.0 \
-    --hash=sha256:dd81c010076b1f2f42efa3aa06afd5ef1b196c4ae1d53085f3f624515d868f56 \
-    --hash=sha256:ee6fce732fa8c5a9d0780708bbd2142df444e60ef9994ddc6aff28e5e1f2feb7
+seventhings-customer-api==1.5.0 \
+    --hash=sha256:4c97bc7643ec7b3fedee4318e5fdcbddb988838cfba3c9f238abf49e9baeaa05 \
+    --hash=sha256:d1a8a087e4be21986e518cc6f38cee0611e21516e5874c9bb8f785031068c32c
     # via -r requirements.in
 typing-extensions==4.16.0 ; python_full_version < '3.15' \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \

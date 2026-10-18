@@ -10,6 +10,8 @@
 | Missing required fields / validation error | Fetch that instance's field definitions; verify field keys, values, and constraints. |
 | Only 100 exported rows | Use `export`, not `hello`; `hello` intentionally fetches one page. |
 | Attachment exits nonzero with status 207 | Inspect the printed result and reuse the returned file UUID when repairing the link. |
+| 429 Too Many Requests | Another client or process is using the same instance. Read the error's Retry-After value, wait, and resend only idempotent reads automatically. Lower the client's rate limit for concurrent jobs. |
+| Export or batch slower than expected | The SDK paces requests at 200 per minute by default. Allow time for the page count, and extend task deadlines (the Go starter uses five minutes). |
 | PHP platform requirement failure | Use PHP 8.5+; the pinned SDK requires it. It is available through Packagist. |
 | Go method differs from a README snippet | Follow the installed SDK version and compiled starter; return types can differ from older snippets. |
 | Export stops early with an error | stdout may contain a partial export. Check the exit status before consuming it as a complete snapshot. |
